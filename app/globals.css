@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #ffffff;
@@ -23,4 +23,44 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .glitch-text {
+    animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+    /* Only glitch on hover to save user's eyes */
+    animation-play-state: paused;
+  }
+
+  .glitch-text:hover {
+    animation-play-state: running;
+  }
+}
+
+/* Cyberpunk themed glitch effect with neon colors */
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+    text-shadow: -2px 0 #00ffff, 2px 0 #ff00ff, -1px 1px #00ffff, 1px -1px #ff00ff;
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    text-shadow: -3px 0 #00ffff, 3px 0 #ff00ff, -2px 2px #00ffff, 2px -2px #ff00ff;
+  }
+  40% {
+    transform: translate(2px, -2px);
+    text-shadow: 3px 0 #00ffff, -3px 0 #ff00ff, 2px -2px #00ffff, -2px 2px #ff00ff;
+  }
+  60% {
+    transform: translate(-2px, -2px);
+    text-shadow: -2px 0 #00ffff, 2px 0 #ff00ff, -1px -1px #00ffff, 1px 1px #ff00ff;
+  }
+  80% {
+    transform: translate(2px, 2px);
+    text-shadow: 2px 0 #00ffff, -2px 0 #ff00ff, 1px 1px #00ffff, -1px -1px #ff00ff;
+  }
+  100% {
+    transform: translate(0);
+    text-shadow: -2px 0 #00ffff, 2px 0 #ff00ff, -1px 1px #00ffff, 1px -1px #ff00ff;
+  }
 }
