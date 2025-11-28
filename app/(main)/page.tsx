@@ -5,11 +5,13 @@ import { useBuzzword } from '@/hooks/use-buzzword'
 import { FilePenLine, RefreshCcw } from 'lucide-react'
 import { BuzzwordService } from '@/lib/services/buzzword-service'
 import { BUZZWORD_ROLES, ROLE_LABELS } from '@/lib/constants/buzzwords'
-import type { BuzzwordRole } from '@/lib/types/buzzword'
+import { useAuth } from '@/hooks/use-auth'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
   const { data, role, animate, setRole, generate } = useBuzzword('ceo')
 
+  const { user } = useAuth()
   // Initialize
   useEffect(() => {
     generate(role)
@@ -88,13 +90,13 @@ export default function Home() {
           className={`
             relative bg-slate-950/90 backdrop-blur-sm border-2 border-cyan-500/40 rounded-lg p-8 md:p-12 shadow-[0_0_30px_rgba(6,182,212,0.4)] overflow-hidden transition-all duration-300 z-10
             hover:border-cyan-400/60 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)]
-            before:absolute before:inset-0 before:bg-gradient-to-br before:from-cyan-500/10 before:via-transparent before:to-magenta-500/10 before:pointer-events-none
+            before:absolute before:inset-0 before:bg-linear-to-br before:from-cyan-500/10 before:via-transparent before:to-magenta-500/10 before:pointer-events-none
             ${animate ? 'scale-95 opacity-80' : 'scale-100 opacity-100'}
         `}
         >
           {/* Holographic scanline effect */}
           <div
-            className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(6,182,212,0.03)_50%)] bg-[length:100%_4px] pointer-events-none opacity-30"
+            className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(6,182,212,0.03)_50%)] bg-size-[100%_4px] pointer-events-none opacity-30"
             style={{
               animation: 'scanline 8s linear infinite',
             }}
@@ -144,24 +146,23 @@ export default function Home() {
 
       {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4 mt-8 w-full max-w-md">
-        <button
-          onClick={() => generate(role)}
-          className="flex-1 flex items-center justify-center gap-2 bg-linear-to from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg shadow-indigo-500/25 transition-all active:scale-95"
-        >
+        <Button variant="gradient" size="xl" onClick={() => generate(role)}>
           <RefreshCcw className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
           Generate
-        </button>
+        </Button>
 
-        <button
+        <Button
+          variant="slate"
+          size="xl"
           onClick={() => {
-            submitToHR()
+            if (user && user.email) {
+              submitToHR()
+            }
             copyToClipboard()
           }}
-          className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-6 py-4 rounded-xl font-semibold transition-all active:scale-95 border border-slate-700"
         >
-          <FilePenLine className="w-6 h-6" />
-          Submit to HR
-        </button>
+          {user && user.email ? 'Submit to HR' : 'Copy to Clipboard'}
+        </Button>
       </div>
     </main>
   )

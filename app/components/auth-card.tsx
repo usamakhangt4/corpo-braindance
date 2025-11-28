@@ -112,12 +112,8 @@ export function AuthCard({
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
-            className={cn(
-              'pl-10 bg-slate-950/50 border-slate-700 text-white',
-              'placeholder:text-slate-500',
-              'focus-visible:border-cyan-500 focus-visible:ring-cyan-500/20',
-              'dark:bg-slate-950/50 dark:border-slate-700',
-            )}
+            variant="neural"
+            hasIcon
           />
         </div>
       </div>
@@ -137,26 +133,14 @@ export function AuthCard({
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={isLoading}
-            className={cn(
-              'pl-10 bg-slate-950/50 border-slate-700 text-white',
-              'placeholder:text-slate-500',
-              'focus-visible:border-cyan-500 focus-visible:ring-cyan-500/20',
-              'dark:bg-slate-950/50 dark:border-slate-700',
-            )}
+            variant="neural"
+            hasIcon
           />
         </div>
       </div>
 
       {/* Submit Button */}
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className={cn(
-          'w-full bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300',
-          'border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]',
-          'font-mono uppercase tracking-wider disabled:opacity-50',
-        )}
-      >
+      <Button type="submit" disabled={isLoading} variant="neural" className="w-full">
         {isLoading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -175,24 +159,26 @@ export function AuthCard({
           {mode === 'login' ? (
             <>
               <span>Don't have an account? </span>
-              <button
+              <Button
+                variant="link"
                 type="button"
                 onClick={switchMode}
                 className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
               >
                 Register Neural Link
-              </button>
+              </Button>
             </>
           ) : (
             <>
               <span>Already have an account? </span>
-              <button
+              <Button
+                variant="link"
                 type="button"
                 onClick={switchMode}
                 className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
               >
                 Sign In
-              </button>
+              </Button>
             </>
           )}
         </div>
