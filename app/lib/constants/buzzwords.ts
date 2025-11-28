@@ -1,0 +1,183 @@
+/**
+ * Constants for buzzword generation data
+ */
+
+export const BUZZWORD_DATA = {
+  // 1. CEO / GENERAL MANAGEMENT (Vague, Visionary, Leadership)
+  ceo: {
+    adverbs: [
+      'holistically',
+      'strategically',
+      'seamlessly',
+      'organically',
+      'proactively',
+      'synergistically',
+      'culturally',
+      'globally',
+      'inherently',
+      'cognitively',
+    ],
+    verbs: [
+      'empower',
+      'envision',
+      'orchestrate',
+      'transform',
+      'evangelize',
+      'champion',
+      'catalyze',
+      'reimagine',
+      'incubate',
+      'harness',
+    ],
+    adjectives: [
+      'mission-critical',
+      'paradigm-shifting',
+      'purpose-driven',
+      'agile',
+      'future-proof',
+      'world-class',
+      'diverse',
+      'resilient',
+      'sustainable',
+      'empathic',
+    ],
+    nouns: [
+      'synergies',
+      'ecosystems',
+      'north stars',
+      'paradigms',
+      'flywheels',
+      'core values',
+      'narratives',
+      'mental models',
+      'growth mindsets',
+      'moonshots',
+    ],
+    templates: [
+      (p: string) => `Our goal is to ${p} to drive long-term value.`,
+      (p: string) => `We must ${p} to stay ahead of the curve.`,
+      (p: string) => `Fundamentally, it's about how we ${p}.`,
+    ],
+  },
+
+  // 2. SALES / MARKETING (Aggressive, Growth, Revenue)
+  sales: {
+    adverbs: [
+      'aggressively',
+      'exponentially',
+      'rapidly',
+      'virally',
+      'frictionlessly',
+      'programmatically',
+      'intelligently',
+      'revenue-first',
+      'contextually',
+    ],
+    verbs: [
+      'monetize',
+      'accelerate',
+      'supercharge',
+      'optimize',
+      'funnel',
+      'capture',
+      'convert',
+      'disrupt',
+      'incentivize',
+      'unlock',
+    ],
+    adjectives: [
+      'high-converting',
+      'ROI-positive',
+      'omnichannel',
+      'actionable',
+      'turnkey',
+      'bespoke',
+      'value-added',
+      'freemium',
+      'hyper-local',
+      'stickier',
+    ],
+    nouns: [
+      'pipelines',
+      'conversions',
+      'deliverables',
+      'KPIs',
+      'touchpoints',
+      'value propositions',
+      'active users',
+      'churn rates',
+      'growth hacks',
+      'activations',
+    ],
+    templates: [
+      (p: string) => `Use this strategy to ${p} and crush Q4 targets.`,
+      (p: string) => `This solution helps you ${p} with zero friction.`,
+      (p: string) => `Ideally, we ${p} to maximize wallet share.`,
+    ],
+  },
+
+  // 3. TECH / ENGINEERING (Complex, Systemic, Jargon-heavy)
+  tech: {
+    adverbs: [
+      'asynchronously',
+      'algorithmically',
+      'recursively',
+      'natively',
+      'virtually',
+      'biometrically',
+      'quantumly',
+      'serverlessly',
+      'autonomously',
+    ],
+    verbs: [
+      'architect',
+      'refactor',
+      'deploy',
+      'automate',
+      'dockerize',
+      'encrypt',
+      'scale',
+      'vectorize',
+      'tokenize',
+      'debug',
+    ],
+    adjectives: [
+      'cloud-native',
+      'idempotent',
+      'distributed',
+      'full-stack',
+      'low-latency',
+      'headless',
+      'zero-trust',
+      'mutable',
+      'blockchain-enabled',
+      'edge-computed',
+    ],
+    nouns: [
+      'microservices',
+      'endpoints',
+      'containers',
+      'neural networks',
+      'latency',
+      'bandwidth',
+      'dependencies',
+      'tech debt',
+      'stacks',
+      'clusters',
+    ],
+    templates: [
+      (p: string) => `We need to ${p} before the next sprint.`,
+      (p: string) => `Basically, the backend will ${p} via the API.`,
+      (p: string) => `To reduce latency, we must ${p} immediately.`,
+    ],
+  },
+} as const
+
+export const BUZZWORD_ROLES = ['ceo', 'sales', 'tech'] as const
+
+export const ROLE_LABELS: Record<string, string> = {
+  ceo: 'VISIONARY',
+  sales: 'GROWTH',
+  tech: 'ENGINEERING',
+} as const
+

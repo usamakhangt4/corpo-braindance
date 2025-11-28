@@ -1,15 +1,20 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Orbitron, JetBrains_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
+import Navbar from './components/Navbar'
+import SplashScreen from './components/splash-screen'
 
-const geistSans = Geist({
+const orbitron = Orbitron({
   variable: '--font-geist-sans',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
 })
 
-const geistMono = Geist_Mono({
+const jetbrainsMono = JetBrains_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
@@ -23,8 +28,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+    <html lang="en" className="dark">
+      <body className={`${orbitron.variable} ${jetbrainsMono.variable} antialiased`}>
+        <SplashScreen />
+        <Suspense fallback={<div className="h-16" />}>
+          <Navbar />
+        </Suspense>
+        <div className="pt-16">{children}</div>
+      </body>
     </html>
   )
 }
