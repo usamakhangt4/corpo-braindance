@@ -146,7 +146,7 @@ export default function Home() {
 
       {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4 mt-8 w-full max-w-md">
-        <Button variant="gradient" size="xl" onClick={() => generate(role)}>
+        <Button variant="gradient" size="xl" onClick={() => generate(role)} className="w-full md:w-1/2">
           <RefreshCcw className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
           Generate
         </Button>
@@ -160,8 +160,10 @@ export default function Home() {
             }
             copyToClipboard()
           }}
+          className="w-full md:w-1/2"
         >
-          {user && user.email ? 'Submit to HR' : 'Copy to Clipboard'}
+          <FilePenLine className="w-6 h-6" />
+          <span>{user && user.email ? 'Submit to HR' : 'Copy to Clipboard'}</span>
         </Button>
       </div>
     </main>
