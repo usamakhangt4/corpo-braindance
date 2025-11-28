@@ -68,7 +68,7 @@ export default function HallOfShame() {
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
 
                 {/* Rank Badge */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-4">
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg border-2 ${
@@ -111,7 +111,7 @@ export default function HallOfShame() {
                 </div>
 
                 {/* Voting Section */}
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-slate-800 flex-col md:flex-row gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500 uppercase font-semibold">Performance Review:</span>
                     <span className="text-cyan-400 font-bold text-lg">{entry.upvotes}</span>

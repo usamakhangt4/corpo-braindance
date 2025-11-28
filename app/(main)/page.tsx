@@ -47,7 +47,7 @@ export default function Home() {
         <p className="text-slate-400 text-lg">Generate enterprise-grade nonsense for 2025.</p>
       </header>
       {/* Role Switcher Tabs - Neural Interface Mode Selector */}
-      <div className="relative flex items-center gap-2 mb-8">
+      <div className="relative flex items-center gap-2 mb-8 flex-col md:flex-row">
         <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider border-r border-cyan-500/30 pr-4">
           [MODE]
         </span>
