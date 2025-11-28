@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,27 +10,24 @@ import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { ROUTES } from '@/lib/constants/routes'
 import { cn } from '@/lib/utils'
+import { AuthMode } from '@/lib/types/auth'
 
 interface AuthCardProps {
-  mode?: 'login' | 'signup'
-  initialMode?: 'login' | 'signup'
+  mode: AuthMode
   title?: string
   description?: string
   showHeader?: boolean
-  showSwitchMode?: boolean
   onSuccess?: () => void
-  onModeChange?: (mode: 'login' | 'signup') => void
+  onModeChange: (mode: AuthMode) => void
   className?: string
   cardClassName?: string
 }
 
 export function AuthCard({
-  mode: controlledMode,
-  initialMode = 'login',
+  mode,
   title,
   description,
   showHeader = true,
-  showSwitchMode = true,
   onSuccess,
   onModeChange,
   className,
@@ -39,14 +35,10 @@ export function AuthCard({
 }: AuthCardProps) {
   const router = useRouter()
   const { signIn, signUp } = useAuth()
-  const [internalMode, setInternalMode] = useState<'login' | 'signup'>(initialMode)
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Use controlled mode if provided, otherwise use internal state
-  const mode = controlledMode ?? internalMode
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -78,16 +70,9 @@ export function AuthCard({
     }
   }
 
-  const switchMode = () => {
-    const newMode = mode === 'login' ? 'signup' : 'login'
-    if (controlledMode === undefined) {
-      setInternalMode(newMode)
-
-      // Update URL without navigation
-      window.history.replaceState({}, '', `/auth?mode=${newMode}`)
-    }
+  const switchMode = (newMode: AuthMode) => {
     setError(null)
-    onModeChange?.(newMode)
+    onModeChange(newMode)
   }
 
   const formContent = (
@@ -155,37 +140,6 @@ export function AuthCard({
           'Register'
         )}
       </Button>
-
-      {/* Switch Mode */}
-      {showSwitchMode && (
-        <div className="text-center text-sm text-slate-400">
-          {mode === 'login' ? (
-            <>
-              <span>Don't have an account? </span>
-              <Button
-                variant="link"
-                type="button"
-                onClick={switchMode}
-                className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
-              >
-                Register Neural Link
-              </Button>
-            </>
-          ) : (
-            <>
-              <span>Already have an account? </span>
-              <Button
-                variant="link"
-                type="button"
-                onClick={switchMode}
-                className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
-              >
-                Sign In
-              </Button>
-            </>
-          )}
-        </div>
-      )}
     </form>
   )
 
@@ -213,7 +167,33 @@ export function AuthCard({
             </CardDescription>
           </CardHeader>
           <CardContent>{formContent}</CardContent>
-          {showSwitchMode && <CardFooter className="flex flex-col gap-4">{/* Switch mode is in form */}</CardFooter>}
+          <CardFooter className="text-center text-sm text-slate-400 grid">
+            {mode === 'login' ? (
+              <>
+                <span>Don't have an account? </span>
+                <Button
+                  variant="link"
+                  type="button"
+                  onClick={() => switchMode('signup')}
+                  className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
+                >
+                  Register Neural Link
+                </Button>
+              </>
+            ) : (
+              <>
+                <span>Already have an account? </span>
+                <Button
+                  variant="link"
+                  type="button"
+                  onClick={() => switchMode('login')}
+                  className="text-cyan-400 hover:text-cyan-300 font-mono uppercase tracking-wider transition-colors"
+                >
+                  Sign In
+                </Button>
+              </>
+            )}
+          </CardFooter>
         </Card>
       </div>
     )

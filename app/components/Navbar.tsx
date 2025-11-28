@@ -19,7 +19,6 @@ interface NavItem {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const { user, signOut } = useAuth()
   const [menuOpen, setMenuOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
@@ -42,11 +41,7 @@ export default function Navbar() {
     if (user) {
       return baseItems
     } else {
-      return [
-        ...baseItems,
-        { href: ROUTES.LOGIN, label: 'Login', icon: LogIn },
-        { href: ROUTES.SIGNUP, label: 'Signup', icon: UserPlus },
-      ]
+      return [...baseItems, { href: ROUTES.LOGIN_PAGE, label: 'Login', icon: LogIn }]
     }
   }, [user, baseItems])
 
@@ -62,8 +57,7 @@ export default function Navbar() {
       return [
         { href: ROUTES.HOME, label: 'Home', icon: Home },
         ...baseItems,
-        { href: ROUTES.LOGIN, label: 'Login', icon: LogIn },
-        { href: ROUTES.SIGNUP, label: 'Signup', icon: UserPlus },
+        { href: ROUTES.LOGIN_PAGE, label: 'Login', icon: LogIn },
       ]
     }
   }, [user, baseItems])
@@ -87,22 +81,14 @@ export default function Navbar() {
           return false
         }
         // Don't include active item
-        if (item.action === 'profile-menu') {
+        if (item.href === ROUTES.PROFILE_PAGE) {
           return true // Keep profile menu trigger
         }
         return pathname !== item.href
       })
       return filtered
     } else {
-      const isOnAuthPage = pathname === '/auth'
-      const isOnLoginPage =
-        isOnAuthPage &&
-        typeof window !== 'undefined' &&
-        new URLSearchParams(window.location.search).get('mode') === 'login'
-      const isOnSignupPage =
-        isOnAuthPage &&
-        typeof window !== 'undefined' &&
-        new URLSearchParams(window.location.search).get('mode') === 'signup'
+      const isOnLoginPage = pathname === ROUTES.LOGIN_PAGE
 
       return allMainNavItems.filter((item) => {
         // Don't include Home (it's in center)
@@ -110,12 +96,10 @@ export default function Navbar() {
           return false
         }
         // Don't include active item
-        if (item.href === ROUTES.LOGIN) {
+        if (item.href === ROUTES.LOGIN_PAGE) {
           return !isOnLoginPage
         }
-        if (item.href === ROUTES.SIGNUP) {
-          return !isOnSignupPage
-        }
+
         return pathname !== item.href
       })
     }
@@ -180,7 +164,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-2">
               {desktopNavItems.map((item) => {
                 const Icon = item.icon
-                const isActive = pathname.includes(item.href) || searchParams.get('mode') === item.href.split('=')[1]
+                const isActive = pathname.includes(item.href)
 
                 return (
                   <Link
