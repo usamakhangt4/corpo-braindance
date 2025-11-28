@@ -80,17 +80,17 @@ export default function Home() {
       {/* Main Card - Holographic Neural Interface Display */}
       <div className="w-full max-w-2xl relative group perspective-1000">
         {/* Background Gradient Blobs - Neural energy fields */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"></div>
+        <div className="hidden md:block absolute -top-8 -right-8 md:-top-20 md:-right-20 w-40 h-40 md:w-64 md:h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"></div>
+        <div className="hidden md:block absolute -bottom-8 -left-8 md:-bottom-20 md:-left-20 w-40 h-40 md:w-64 md:h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"></div>
         <div
-          className="absolute -bottom-20 -left-20 w-64 h-64 bg-magenta-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"
+          className="hidden md:block absolute -bottom-8 -left-8 md:-bottom-20 md:-left-20 w-40 h-40 md:w-64 md:h-64 bg-magenta-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"
           style={{ animationDelay: '1s' }}
         ></div>
 
         <div
           className={`
-            relative bg-slate-950/90 backdrop-blur-sm border-2 border-cyan-500/40 rounded-lg p-8 md:p-12 shadow-[0_0_30px_rgba(6,182,212,0.4)] overflow-hidden transition-all duration-300 z-10
+            relative bg-slate-950/90 backdrop-blur-sm border-2 border-cyan-500/40 rounded-lg p-4 sm:p-6 md:p-8 lg:p-12 shadow-[0_0_30px_rgba(6,182,212,0.4)] overflow-hidden transition-all duration-300 z-10
             hover:border-cyan-400/60 hover:shadow-[0_0_50px_rgba(6,182,212,0.6)]
-            before:absolute before:inset-0 before:bg-linear-to-br before:from-cyan-500/10 before:via-transparent before:to-magenta-500/10 before:pointer-events-none
             ${animate ? 'scale-95 opacity-80' : 'scale-100 opacity-100'}
         `}
         >
@@ -114,7 +114,7 @@ export default function Home() {
           {/* Content */}
           <div className="relative z-10">
             {/* Label */}
-            <div className="flex justify-between items-center mb-6 gap-2 flex-wrap">
+            <div className="flex justify-center md:justify-between items-center mb-6 gap-2 flex-wrap">
               <span className="text-xs font-bold text-cyan-400 uppercase tracking-[0.2em] border border-cyan-500/50 bg-cyan-500/10 backdrop-blur-sm px-3 py-1 rounded">
                 [{data.role} MODE]
               </span>
