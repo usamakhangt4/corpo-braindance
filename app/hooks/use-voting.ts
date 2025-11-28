@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { BuzzwordService } from '@/lib/services/buzzword-service'
+import { useAuth } from './use-auth'
 import type { BuzzwordEntry } from '@/lib/types/buzzword'
 import type { VoteAction } from '@/lib/types/buzzword'
 
@@ -11,25 +12,21 @@ interface UseVotingReturn {
   votingIds: Set<number>
   fetchTopPhrases: () => Promise<void>
   handleVote: (id: number, action: VoteAction) => Promise<void>
+  requiresAuth: boolean
 }
 
 const TOP_PHRASES_LIMIT = 10
 
 export function useVoting(): UseVotingReturn {
+  const { user } = useAuth()
   const [entries, setEntries] = useState<BuzzwordEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [votingIds, setVotingIds] = useState<Set<number>>(new Set())
 
   const fetchTopPhrases = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from('buzzwords')
-        .select('*')
-        .order('upvotes', { ascending: false })
-        .limit(TOP_PHRASES_LIMIT)
-
-      if (error) throw error
-      setEntries(data || [])
+      const data = await BuzzwordService.getTopBuzzwords(TOP_PHRASES_LIMIT)
+      setEntries(data)
     } catch (error) {
       console.error('Error fetching phrases:', error)
     } finally {
@@ -39,6 +36,11 @@ export function useVoting(): UseVotingReturn {
 
   const handleVote = useCallback(
     async (id: number, action: VoteAction) => {
+      if (!user) {
+        // Return early - component should show auth modal
+        return
+      }
+
       if (votingIds.has(id)) return // Prevent double voting
 
       setVotingIds((prev) => new Set(prev).add(id))
@@ -53,13 +55,7 @@ export function useVoting(): UseVotingReturn {
       setEntries((prev) => prev.map((entry) => (entry.id === id ? { ...entry, upvotes: newUpvotes } : entry)))
 
       try {
-        const { error } = await supabase.from('buzzwords').update({ upvotes: newUpvotes }).eq('id', id)
-
-        if (error) {
-          // Revert on error
-          await fetchTopPhrases()
-          throw error
-        }
+        await BuzzwordService.updateUpvotes(id, newUpvotes)
 
         // Re-fetch to ensure correct ordering (top 10 might have changed)
         await fetchTopPhrases()
@@ -75,7 +71,7 @@ export function useVoting(): UseVotingReturn {
         })
       }
     },
-    [entries, votingIds, fetchTopPhrases]
+    [entries, votingIds, fetchTopPhrases, user],
   )
 
   return {
@@ -84,6 +80,6 @@ export function useVoting(): UseVotingReturn {
     votingIds,
     fetchTopPhrases,
     handleVote,
+    requiresAuth: !user,
   }
 }
-

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useBuzzword } from '@/hooks/use-buzzword'
 import { FilePenLine, RefreshCcw } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
+import { BuzzwordService } from '@/lib/services/buzzword-service'
 import { BUZZWORD_ROLES, ROLE_LABELS } from '@/lib/constants/buzzwords'
 import type { BuzzwordRole } from '@/lib/types/buzzword'
 
@@ -23,18 +23,12 @@ export default function Home() {
 
   const submitToHR = async () => {
     if (!data) return
-    const { error } = await supabase.from('buzzwords').insert({
-      phrase: data.phrase,
-      meaning: data.fullSentence,
-      department: data.role,
-      synergy_score: data.score,
-    })
-
-    if (error) {
+    try {
+      await BuzzwordService.submitBuzzword(data)
+      alert('Filed to Permanent Record.')
+    } catch (error) {
       alert('Error: HR rejected your submission.')
       console.error(error)
-    } else {
-      alert('Filed to Permanent Record.')
     }
   }
 

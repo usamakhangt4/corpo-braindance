@@ -2,17 +2,41 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Trophy, FileText } from 'lucide-react'
+import { Home, Trophy, FileText, UserPlus, LogIn, LucideIcon, LogOut } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
+import { useAuth } from '@/hooks/use-auth'
+import { useMemo } from 'react'
+import { Button } from './ui/button'
+import UserDropdown from './UserDropdown'
+
+interface NavItem {
+  href: string
+  label: string
+  icon: LucideIcon
+}
 
 export default function Navbar() {
   const pathname = usePathname()
+  const { user, signOut } = useAuth()
 
-  const navItems = [
-    { href: ROUTES.HOME, label: 'Generator', icon: Home },
-    { href: ROUTES.HALL_OF_SHAME, label: 'Hall of Shame', icon: Trophy },
-  ]
+  const navItems = useMemo<NavItem[]>(() => {
+    const baseItems: NavItem[] = [
+      { href: ROUTES.HOME, label: 'Generator', icon: Home },
+      { href: ROUTES.HALL_OF_SHAME, label: 'Hall of Shame', icon: Trophy },
+    ]
 
+    if (user) {
+      // Authenticated: show base items only (or add profile/dashboard)
+      return baseItems
+    } else {
+      // Unauthenticated: add login/signup
+      return [
+        ...baseItems,
+        { href: ROUTES.LOGIN, label: 'Login', icon: LogIn },
+        { href: ROUTES.SIGNUP, label: 'Signup', icon: UserPlus },
+      ]
+    }
+  }, [user])
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/50 shadow-lg shadow-cyan-500/5">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -55,6 +79,9 @@ export default function Navbar() {
                 </Link>
               )
             })}
+
+            {/* User Menu - Show when authenticated */}
+            {user && <UserDropdown />}
           </div>
         </div>
       </div>
