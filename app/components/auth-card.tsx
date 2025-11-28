@@ -82,6 +82,9 @@ export function AuthCard({
     const newMode = mode === 'login' ? 'signup' : 'login'
     if (controlledMode === undefined) {
       setInternalMode(newMode)
+
+      // Update URL without navigation
+      window.history.replaceState({}, '', `/auth?mode=${newMode}`)
     }
     setError(null)
     onModeChange?.(newMode)

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Orbitron, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from './components/Navbar'
+import SplashScreen from './components/splash-screen'
 
 const orbitron = Orbitron({
   variable: '--font-geist-sans',
@@ -26,8 +27,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={`${orbitron.variable} ${jetbrainsMono.variable} antialiased`}>
+        <SplashScreen />
         <Navbar />
         <div className="pt-16">{children}</div>
       </body>

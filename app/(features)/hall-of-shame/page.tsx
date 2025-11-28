@@ -23,14 +23,6 @@ export default function HallOfShame() {
     handleVote(id, action)
   }
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-white font-sans flex flex-col items-center justify-center p-4 md:p-8">
-        <div className="text-cyan-400 font-mono animate-pulse">Loading Performance Reviews...</div>
-      </main>
-    )
-  }
-
   return (
     <>
       <main className="min-h-screen bg-slate-950 text-white font-sans flex flex-col items-center p-4 md:p-8">
@@ -45,7 +37,24 @@ export default function HallOfShame() {
 
         {/* Rankings List */}
         <div className="w-full max-w-4xl space-y-4">
-          {entries.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-6">
+              {/* Loading Animation */}
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+                <div
+                  className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.4s' }}
+                ></div>
+              </div>
+              {/* Loading Message */}
+              <p className="text-cyan-400 font-mono text-sm tracking-wider uppercase">Loading Performance Reviews...</p>
+            </div>
+          ) : entries.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-slate-500 text-lg">No entries yet. Be the first to submit to HR!</p>
             </div>

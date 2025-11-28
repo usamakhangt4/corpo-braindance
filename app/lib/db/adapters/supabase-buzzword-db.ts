@@ -3,21 +3,13 @@
  * For use in Client Components
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabaseClient'
 import type { IBuzzwordDb } from './buzzword-db'
 import type { BuzzwordEntry } from '@/lib/types/buzzword'
 
 export class SupabaseBuzzwordDb implements IBuzzwordDb {
-  private supabase
-
-  constructor() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    this.supabase = createClient(supabaseUrl, supabaseKey)
-  }
-
   async getTopBuzzwords(limit: number): Promise<BuzzwordEntry[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await supabase
       .from('buzzwords')
       .select('*')
       .order('upvotes', { ascending: false })
@@ -28,7 +20,7 @@ export class SupabaseBuzzwordDb implements IBuzzwordDb {
   }
 
   async createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes'>): Promise<BuzzwordEntry> {
-    const { data: result, error } = await this.supabase
+    const { data: result, error } = await supabase
       .from('buzzwords')
       .insert({
         phrase: data.phrase,
@@ -44,14 +36,14 @@ export class SupabaseBuzzwordDb implements IBuzzwordDb {
   }
 
   async updateUpvotes(id: number, upvotes: number): Promise<BuzzwordEntry> {
-    const { data, error } = await this.supabase.from('buzzwords').update({ upvotes }).eq('id', id).select().single()
+    const { data, error } = await supabase.from('buzzwords').update({ upvotes }).eq('id', id).select().single()
 
     if (error) throw error
     return data as BuzzwordEntry
   }
 
   async getById(id: number): Promise<BuzzwordEntry | null> {
-    const { data, error } = await this.supabase.from('buzzwords').select('*').eq('id', id).single()
+    const { data, error } = await supabase.from('buzzwords').select('*').eq('id', id).single()
 
     if (error) return null
     return data as BuzzwordEntry

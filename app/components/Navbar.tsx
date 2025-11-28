@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { Home, Trophy, FileText, UserPlus, LogIn, LucideIcon, LogOut } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
 import { useAuth } from '@/hooks/use-auth'
@@ -17,11 +17,12 @@ interface NavItem {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
+  const searchParams = useSearchParams()
 
   const navItems = useMemo<NavItem[]>(() => {
     const baseItems: NavItem[] = [
-      { href: ROUTES.HOME, label: 'Generator', icon: Home },
+      // { href: ROUTES.HOME, label: 'Generator', icon: Home },
       { href: ROUTES.HALL_OF_SHAME, label: 'Hall of Shame', icon: Trophy },
     ]
 
@@ -59,7 +60,8 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {navItems.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href
+              const isActive = pathname.includes(item.href) || searchParams.get('mode') === item.href.split('=')[1]
+
               return (
                 <Link
                   key={item.href}
