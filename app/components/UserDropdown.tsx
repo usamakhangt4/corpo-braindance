@@ -60,7 +60,7 @@ export default function UserDropdown() {
           )}
         >
           <Link href="/profile" className="flex items-center gap-2">
-            <User className="w-4 h-4" />
+            <User className="w-4 h-4 text-inherit" />
             <span>Profile</span>
           </Link>
         </DropdownMenuItem>
@@ -74,7 +74,7 @@ export default function UserDropdown() {
           )}
         >
           <Link href="/settings" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4 text-inherit" />
             <span>Settings</span>
           </Link>
         </DropdownMenuItem>
@@ -89,7 +89,7 @@ export default function UserDropdown() {
             'text-xs uppercase tracking-wider',
           )}
         >
-          <LogOut className="w-4 h-4 mr-2" />
+          <LogOut className="w-4 h-4 mr-2 text-inherit" />
           <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
