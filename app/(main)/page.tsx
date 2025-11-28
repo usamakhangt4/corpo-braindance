@@ -114,7 +114,7 @@ export default function Home() {
           {/* Content */}
           <div className="relative z-10">
             {/* Label */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 gap-2 flex-wrap">
               <span className="text-xs font-bold text-cyan-400 uppercase tracking-[0.2em] border border-cyan-500/50 bg-cyan-500/10 backdrop-blur-sm px-3 py-1 rounded">
                 [{data.role} MODE]
               </span>
@@ -129,7 +129,7 @@ export default function Home() {
             </div>
 
             {/* The Phrase */}
-            <h2 className="text-3xl md:text-5xl font-serif font-medium text-slate-100 leading-tight mb-8">
+            <h2 className="text-3xl md:text-5xl font-serif font-medium text-slate-100 leading-tight mb-8 text-center md:text-left">
               "{data.phrase}"
             </h2>
 
