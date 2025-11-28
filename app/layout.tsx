@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Orbitron, JetBrains_Mono } from 'next/font/google'
+import { Suspense } from 'react'
 import './globals.css'
 import Navbar from './components/Navbar'
 import SplashScreen from './components/splash-screen'
@@ -30,7 +31,9 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${orbitron.variable} ${jetbrainsMono.variable} antialiased`}>
         <SplashScreen />
-        <Navbar />
+        <Suspense fallback={<div className="h-16" />}>
+          <Navbar />
+        </Suspense>
         <div className="pt-16">{children}</div>
       </body>
     </html>
