@@ -5,7 +5,6 @@
 export const ROUTES = {
   HOME: '/',
   HALL_OF_SHAME: '/hall-of-shame',
-  AUTH: '/auth',
-  LOGIN: '/auth?mode=login',
-  SIGNUP: '/auth?mode=signup',
+  LOGIN_PAGE: '/login',
+  PROFILE_PAGE: '/profile',
 } as const

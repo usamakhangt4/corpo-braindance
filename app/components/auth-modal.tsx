@@ -4,18 +4,19 @@ import { useState } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { AuthCard } from './auth-card'
+import {AuthMode} from '@/lib/types/auth'
 
 interface AuthModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mode?: 'login' | 'signup'
+  mode?: AuthMode,
   title?: string
   description?: string
   onSuccess?: () => void
 }
 
 export function AuthModal({ open, onOpenChange, mode: initialMode = 'login', title, description }: AuthModalProps) {
-  const [mode, setMode] = useState<'login' | 'signup'>(initialMode)
+  const [mode, setMode] = useState<AuthMode>(initialMode)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

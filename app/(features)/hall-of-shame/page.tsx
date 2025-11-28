@@ -8,6 +8,7 @@ import { AuthModal } from '@/components/auth-modal'
 
 export default function HallOfShame() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [mode, setMode] = useState<'login' | 'signup'>('login')
 
   const { entries, loading, votingIds, fetchTopPhrases, handleVote, requiresAuth } = useVoting()
 
@@ -147,13 +148,10 @@ export default function HallOfShame() {
       <AuthModal
         open={authModalOpen}
         onOpenChange={setAuthModalOpen}
-        mode="login"
-        title="Sign in to Vote"
+        mode={mode}
+        onSuccess={() => setMode('login')}
+        title={mode === 'login' ? 'Sign in to Vote' : 'Sign up to Vote'}
         description="You need to be authenticated to vote on buzzwords"
-        onSuccess={() => {
-          // Retry the vote after successful login
-          // You might want to store the pending vote action
-        }}
       />
     </>
   )
