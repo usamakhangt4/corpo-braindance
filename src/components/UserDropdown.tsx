@@ -8,12 +8,38 @@ import {
 } from './ui/dropdown-menu'
 import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { User, Settings, LogOut, ChevronDown, LucideIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/use-auth'
 
+interface DropdownMenuItem {
+  label: string
+  href: string
+  icon: LucideIcon
+  disabled?: boolean
+}
+
+const MENU_ITEM_BASE_CLASSES = 'text-xs uppercase tracking-wider cursor-pointer font-mono transition-colors'
+const MENU_ITEM_DEFAULT_CLASSES =
+  'text-slate-300 hover:text-cyan-300 hover:bg-slate-800/50 focus:bg-slate-800/50 focus:text-cyan-300'
+
 export default function UserDropdown() {
   const { user, signOut } = useAuth()
+
+  const DROPDOWN_MENU_ITEMS: DropdownMenuItem[] = [
+    {
+      label: 'Profile',
+      href: '/profile',
+      icon: User,
+      disabled: false,
+    },
+    {
+      label: 'Settings',
+      href: '/settings',
+      icon: Settings,
+      disabled: true,
+    },
+  ]
 
   const handleSignOut = async () => {
     await signOut()
@@ -51,45 +77,24 @@ export default function UserDropdown() {
         <DropdownMenuLabel className="text-cyan-400 uppercase tracking-wider text-xs">Neural Profile</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-slate-700" />
 
-        <DropdownMenuItem
-          asChild
-          className={cn(
-            'text-slate-300 hover:text-cyan-300 hover:bg-slate-800/50',
-            'cursor-pointer focus:bg-slate-800/50 focus:text-cyan-300',
-            'text-xs uppercase tracking-wider',
-          )}
-        >
-          <Link href="/profile" className="flex items-center gap-2">
-            <User className="w-4 h-4 text-inherit" />
-            <span>Profile</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          asChild
-          className={cn(
-            'text-slate-300 hover:text-cyan-300 hover:bg-slate-800/50',
-            'cursor-pointer focus:bg-slate-800/50 focus:text-cyan-300',
-            'text-xs uppercase tracking-wider',
-          )}
-        >
-          <Link href="/settings" className="flex items-center gap-2">
-            <Settings className="w-4 h-4 text-inherit" />
-            <span>Settings</span>
-          </Link>
-        </DropdownMenuItem>
+        {DROPDOWN_MENU_ITEMS.map((item) => (
+          <DropdownMenuItem
+            key={item.href}
+            asChild
+            disabled={item.disabled}
+            className={cn(MENU_ITEM_BASE_CLASSES, MENU_ITEM_DEFAULT_CLASSES)}
+          >
+            <Link href={item.href} className="flex items-center gap-2">
+              <item.icon className="w-4 h-4 text-inherit" />
+              <span>{item.label}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
 
         <DropdownMenuSeparator className="bg-slate-700" />
 
-        <DropdownMenuItem
-          onClick={handleSignOut}
-          className={cn(
-            'text-red-400 hover:text-red-300 hover:bg-red-500/10',
-            'cursor-pointer focus:bg-red-500/10 focus:text-red-300',
-            'text-xs uppercase tracking-wider',
-          )}
-        >
-          <LogOut className="w-4 h-4 mr-2 text-inherit" />
+        <DropdownMenuItem onClick={handleSignOut} variant="destructive" className={cn(MENU_ITEM_BASE_CLASSES)}>
+          <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
