@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { Orbitron, JetBrains_Mono } from 'next/font/google'
 import { Suspense } from 'react'
 import './globals.css'
-import Navbar from './components/Navbar'
-import SplashScreen from './components/splash-screen'
+import Navbar from '../components/Navbar'
+import SplashScreen from '../components/splash-screen'
 
 const orbitron = Orbitron({
   variable: '--font-geist-sans',
