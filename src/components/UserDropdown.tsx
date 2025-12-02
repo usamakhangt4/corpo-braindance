@@ -16,7 +16,6 @@ interface DropdownMenuItem {
   label: string
   href: string
   icon: LucideIcon
-  disabled?: boolean
 }
 
 const MENU_ITEM_BASE_CLASSES = 'text-xs uppercase tracking-wider cursor-pointer font-mono transition-colors'
@@ -31,13 +30,11 @@ export default function UserDropdown() {
       label: 'Profile',
       href: '/profile',
       icon: User,
-      disabled: false,
     },
     {
       label: 'Settings',
       href: '/settings',
       icon: Settings,
-      disabled: true,
     },
   ]
 
@@ -78,12 +75,7 @@ export default function UserDropdown() {
         <DropdownMenuSeparator className="bg-slate-700" />
 
         {DROPDOWN_MENU_ITEMS.map((item) => (
-          <DropdownMenuItem
-            key={item.href}
-            asChild
-            disabled={item.disabled}
-            className={cn(MENU_ITEM_BASE_CLASSES, MENU_ITEM_DEFAULT_CLASSES)}
-          >
+          <DropdownMenuItem key={item.href} asChild className={cn(MENU_ITEM_BASE_CLASSES, MENU_ITEM_DEFAULT_CLASSES)}>
             <Link href={item.href} className="flex items-center gap-2">
               <item.icon className="w-4 h-4 text-inherit" />
               <span>{item.label}</span>
