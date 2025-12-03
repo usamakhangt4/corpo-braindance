@@ -10,7 +10,7 @@ import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
 import { User, Settings, LogOut, ChevronDown, LucideIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useAuth } from '@/hooks/use-auth'
+import { useAuthStore } from '@/lib/stores/use-auth-store'
 
 interface DropdownMenuItem {
   label: string
@@ -23,7 +23,7 @@ const MENU_ITEM_DEFAULT_CLASSES =
   'text-slate-300 hover:text-cyan-300 hover:bg-slate-800/50 focus:bg-slate-800/50 focus:text-cyan-300'
 
 export default function UserDropdown() {
-  const { user, signOut } = useAuth()
+  const { user, signOut } = useAuthStore()
 
   const DROPDOWN_MENU_ITEMS: DropdownMenuItem[] = [
     {

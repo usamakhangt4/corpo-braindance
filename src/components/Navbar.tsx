@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Home, Trophy, LogIn, UserPlus, LucideIcon, LogOut, User, Settings, Menu, X } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
-import { useAuth } from '@/hooks/use-auth'
+import { useAuthStore } from '@/lib/stores/use-auth-store'
 import UserDropdown from './UserDropdown'
 import RadialMenu from './RadialMenu'
 import { cn } from '@/lib/utils'
@@ -19,7 +19,7 @@ interface NavItem {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
+  const { user, signOut } = useAuthStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
 

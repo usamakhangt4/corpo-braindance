@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Mail, Lock, AlertCircle } from 'lucide-react'
-import { useAuth } from '@/hooks/use-auth'
+import { useAuthStore } from '@/lib/stores/use-auth-store'
 import { ROUTES } from '@/lib/constants/routes'
 import { cn } from '@/lib/utils'
 import { AuthMode } from '@/lib/types/auth'
@@ -34,7 +34,7 @@ export function AuthCard({
   cardClassName,
 }: AuthCardProps) {
   const router = useRouter()
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp } = useAuthStore()
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)

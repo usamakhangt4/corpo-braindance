@@ -1,18 +1,20 @@
 /**
- * Buzzword service layer (Client-side)
- * Provides business logic for Client Components
+ * Unified buzzword service
+ * Works in both Server Components and Client Components
  *
- * For Server Components, use @/lib/services/server-buzzword-service
+ * Server Components: Use directly
+ * Client Components: Use via Zustand stores
  */
 
-import { buzzwordDb } from '@/lib/db/client'
+import { buzzwordDb } from '@/lib/db/buzzword-db'
+import { HALL_OF_SHAME_LIMIT } from '@/lib/constants/buzzwords'
 import type { BuzzwordData } from '@/lib/types/buzzword'
 import type { BuzzwordEntry } from '@/lib/types/buzzword'
+import type { GetAllBuzzwordsOptions } from '@/lib/db/buzzword-db'
 
 export class BuzzwordService {
   /**
-   * Submit a buzzword (Client-side)
-   * For use in Client Components
+   * Submit a buzzword
    */
   static async submitBuzzword(data: BuzzwordData): Promise<BuzzwordEntry> {
     return await buzzwordDb.createBuzzword({
@@ -25,10 +27,17 @@ export class BuzzwordService {
 
   /**
    * Get top buzzwords by upvotes
-   * @param limit - Maximum number of results (default: 10)
+   * @param limit - Maximum number of results (default: HALL_OF_SHAME_LIMIT)
    */
-  static async getTopBuzzwords(limit: number = 10): Promise<BuzzwordEntry[]> {
+  static async getTopBuzzwords(limit: number = HALL_OF_SHAME_LIMIT): Promise<BuzzwordEntry[]> {
     return await buzzwordDb.getTopBuzzwords(limit)
+  }
+
+  /**
+   * Get all buzzwords with pagination and sorting
+   */
+  static async getAllBuzzwords(options?: GetAllBuzzwordsOptions): Promise<BuzzwordEntry[]> {
+    return await buzzwordDb.getAllBuzzwords(options)
   }
 
   /**

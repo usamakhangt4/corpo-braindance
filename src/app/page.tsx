@@ -1,19 +1,20 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useBuzzword } from '@/hooks/use-buzzword'
 import { FilePenLine, RefreshCcw } from 'lucide-react'
-import { BuzzwordService } from '@/lib/services/buzzword-service'
 import { BUZZWORD_ROLES, ROLE_LABELS } from '@/lib/constants/buzzwords'
-import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/lib/stores/use-auth-store'
+import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
 
 export default function Home() {
-  const { data, role, animate, setRole, generate } = useBuzzword('ceo')
+  // Use Zustand stores instead of hooks
+  const { currentBuzzword: data, role, animate, setRole, generate } = useBuzzwordStore()
+  const { user } = useAuthStore()
 
-  const { user } = useAuth()
-  // Initialize
+  // Initialize auth and generate first buzzword
   useEffect(() => {
+    useAuthStore.getState().initialize()
     generate(role)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -25,11 +26,20 @@ export default function Home() {
 
   const submitToHR = async () => {
     if (!data) return
+
+    // Check authentication client-side first
+    if (!user) {
+      alert('Please sign in to submit buzzwords to HR.')
+      return
+    }
+
     try {
-      await BuzzwordService.submitBuzzword(data)
+      const { submitBuzzwordAction } = await import('@/app/actions/buzzword')
+      await submitBuzzwordAction(data)
       alert('Filed to Permanent Record.')
     } catch (error) {
-      alert('Error: HR rejected your submission.')
+      const errorMessage = error instanceof Error ? error.message : 'HR rejected your submission.'
+      alert(`Error: ${errorMessage}`)
       console.error(error)
     }
   }
