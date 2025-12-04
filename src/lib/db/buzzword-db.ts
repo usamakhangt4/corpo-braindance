@@ -17,7 +17,9 @@ export interface GetAllBuzzwordsOptions {
 export interface IBuzzwordDb {
   getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]>
   getAllBuzzwords(options?: GetAllBuzzwordsOptions & { userId?: string | null }): Promise<BuzzwordEntry[]>
-  createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string }): Promise<BuzzwordEntry>
+  createBuzzword(
+    data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string },
+  ): Promise<BuzzwordEntry>
   updateUpvotes(id: number, upvotes: number): Promise<BuzzwordEntry>
   getById(id: number, userId?: string | null): Promise<BuzzwordEntry | null>
   voteBuzzword(buzzwordId: number, userId: string, voteType: 'upvote' | 'downvote'): Promise<void>
@@ -27,7 +29,7 @@ export interface IBuzzwordDb {
 class BuzzwordDb implements IBuzzwordDb {
   async getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]> {
     const supabase = await getSupabaseClient()
-    
+
     // Fetch buzzwords
     const { data, error } = await supabase
       .from('buzzwords')
@@ -59,7 +61,7 @@ class BuzzwordDb implements IBuzzwordDb {
 
       // Map votes to entries
       const voteMap = new Map<number, 'upvote' | 'downvote'>()
-      votes?.forEach((vote) => {
+      votes?.forEach((vote: { buzzword_id: number; vote_type: 'upvote' | 'downvote' }) => {
         voteMap.set(vote.buzzword_id, vote.vote_type as 'upvote' | 'downvote')
       })
 
@@ -113,7 +115,7 @@ class BuzzwordDb implements IBuzzwordDb {
 
         // Map votes to entries
         const voteMap = new Map<number, 'upvote' | 'downvote'>()
-        votes?.forEach((vote) => {
+        votes?.forEach((vote: { buzzword_id: number; vote_type: 'upvote' | 'downvote' }) => {
           voteMap.set(vote.buzzword_id, vote.vote_type as 'upvote' | 'downvote')
         })
 
@@ -128,7 +130,9 @@ class BuzzwordDb implements IBuzzwordDb {
     return entries
   }
 
-  async createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string }): Promise<BuzzwordEntry> {
+  async createBuzzword(
+    data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string },
+  ): Promise<BuzzwordEntry> {
     const supabase = await getSupabaseClient()
     const { data: result, error } = await supabase
       .from('buzzwords')

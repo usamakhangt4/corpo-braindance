@@ -55,7 +55,6 @@ export default function UserDropdown() {
         return null
       }
 
-      console.log('Profile fetched:', { avatar_url: data.avatar_url, display_name: data.display_name })
       return data as Profile
     },
     enabled: !!user?.id,
@@ -82,7 +81,6 @@ export default function UserDropdown() {
   // Reset avatarError when avatar_url changes
   useEffect(() => {
     if (profile?.avatar_url) {
-      console.log('Profile avatar_url changed, resetting error:', profile.avatar_url)
       setAvatarError(false)
     }
   }, [profile?.avatar_url])
@@ -97,19 +95,6 @@ export default function UserDropdown() {
 
   const avatarUrl = processAvatarUrl(profile?.avatar_url)
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User'
-
-  // Debug logging
-  useEffect(() => {
-    if (profile) {
-      console.log('Profile state:', {
-        hasProfile: !!profile,
-        avatar_url: profile.avatar_url,
-        processedAvatarUrl: avatarUrl,
-        avatarError,
-        willShowAvatar: !!avatarUrl && !avatarError,
-      })
-    }
-  }, [profile, avatarError, avatarUrl])
 
   return (
     <DropdownMenu>
@@ -141,7 +126,6 @@ export default function UserDropdown() {
                     setAvatarError(true)
                   }}
                   onLoad={() => {
-                    console.log('Avatar image loaded successfully:', avatarUrl)
                     setAvatarError(false)
                   }}
                 />
