@@ -5,10 +5,11 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Home, Trophy, LogIn, UserPlus, LucideIcon, LogOut, User, Settings, Menu, X } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
-import { useAuth } from '@/hooks/use-auth'
+import { useAuthStore } from '@/lib/stores/use-auth-store'
 import UserDropdown from './UserDropdown'
 import RadialMenu from './RadialMenu'
 import { cn } from '@/lib/utils'
+import { BrandLogo } from './BrandLogo'
 
 interface NavItem {
   href: string
@@ -19,7 +20,7 @@ interface NavItem {
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
+  const { user, signOut } = useAuthStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
 
@@ -29,8 +30,8 @@ export default function Navbar() {
   // Profile menu items (shown when profile icon is clicked)
   const profileMenuItems = useMemo<NavItem[]>(
     () => [
-      { href: '/profile', label: 'Profile', icon: User },
-      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: ROUTES.PROFILE_PAGE, label: 'Profile', icon: User },
+      { href: ROUTES.SETTINGS_PAGE, label: 'Settings', icon: Settings },
       { href: '#', label: 'Logout', icon: LogOut, action: 'logout' },
     ],
     [],
@@ -143,22 +144,11 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/50 shadow-lg shadow-cyan-500/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-surface-base/95 backdrop-blur-md border-b border-elevated/50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo/Brand */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg group-hover:bg-cyan-500/30 transition-colors"></div>
-                <div className="relative px-3 py-1.5 border border-cyan-500/30 rounded-lg bg-slate-900/50">
-                  <span className="text-cyan-400 font-mono text-xs font-bold tracking-wider">CORPO</span>
-                </div>
-              </div>
-              <span className="text-slate-400 font-mono text-xs tracking-[0.3em] hidden sm:inline">//</span>
-              <span className="text-pink-400 font-mono text-xs font-bold tracking-wider hidden sm:inline">
-                BRAINDANCE
-              </span>
-            </Link>
+            <BrandLogo href="/" size="sm" />
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-2">
@@ -173,12 +163,12 @@ export default function Navbar() {
                     className={cn(
                       'relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200',
                       isActive
-                        ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
-                        : 'text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50 border border-transparent hover:border-cyan-500/20',
+                        ? 'text-neural-primary-hover bg-neural-primary/10 border border-neural-primary/30 shadow-lg'
+                        : 'text-secondary hover:text-neural-primary-hover hover:bg-surface-overlay/50 border border-transparent hover:border-neural-primary/20',
                     )}
                   >
-                    {isActive && <div className="absolute inset-0 bg-cyan-500/5 rounded-lg animate-pulse"></div>}
-                    <Icon className={cn('w-4 h-4', isActive ? 'text-cyan-400' : 'text-slate-500')} />
+                    {isActive && <div className="absolute inset-0 bg-neural-primary/5 rounded-lg animate-pulse"></div>}
+                    <Icon className={cn('w-4 h-4', isActive ? 'text-neural-primary-hover' : 'text-muted')} />
                     <span className="relative uppercase tracking-wider text-xs">{item.label}</span>
                   </Link>
                 )
@@ -193,23 +183,23 @@ export default function Navbar() {
               onClick={handleMenuToggle}
               className={cn(
                 'md:hidden w-10 h-10 rounded-lg',
-                'bg-slate-900/95 backdrop-blur-md border-2',
-                'border-cyan-500/50 shadow-lg shadow-cyan-500/20',
+                'bg-surface-elevated/95 backdrop-blur-md border-2',
+                'border-neural-primary/50 shadow-lg shadow-neural',
                 'flex items-center justify-center',
                 'transition-all duration-200',
-                'hover:bg-slate-800/95 hover:border-cyan-400/70',
-                'hover:shadow-cyan-500/30 hover:scale-105',
+                'hover:bg-surface-overlay/95 hover:border-neural-primary-hover/70',
+                'hover:shadow-neural-accent hover:scale-105',
                 'active:scale-95',
                 'focus-visible:outline-none focus-visible:ring-2',
-                'focus-visible:ring-cyan-500/50 focus-visible:ring-offset-2',
-                'focus-visible:ring-offset-slate-950',
-                menuOpen && 'border-cyan-400 shadow-xl shadow-cyan-500/40',
+                'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
+                'focus-visible:ring-offset-surface-base',
+                menuOpen && 'border-neural-primary-hover shadow-xl shadow-neural-accent',
               )}
               aria-label="Toggle menu"
               type="button"
             >
-              <div className="absolute inset-0 bg-cyan-500/10 rounded-lg blur-lg" />
-              <Menu className="relative z-10 w-5 h-5 text-cyan-400" />
+              <div className="absolute inset-0 bg-neural-primary/10 rounded-lg blur-lg" />
+              <Menu className="relative z-10 w-5 h-5 text-neural-primary-hover" />
             </button>
           </div>
         </div>

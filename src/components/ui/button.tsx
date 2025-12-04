@@ -19,16 +19,16 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         // New variants for Corpo Braindance theme
         gradient:
-          'bg-linear-to from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/50 active:scale-95',
+          'bg-linear-to from-[var(--color-gradient-primary-start)] to-[var(--color-gradient-primary-end)] hover:from-[var(--color-gradient-primary-start)] hover:to-[var(--color-gradient-primary-end)] text-white shadow-lg border border-indigo-400/50 active:scale-95',
         neural:
-          'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] font-mono uppercase tracking-wider',
-        slate: 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95',
+          'bg-neural-primary/20 hover:bg-neural-primary/30 text-neural-primary-light border border-neural-primary/50 shadow-neural font-mono uppercase tracking-wider',
+        slate: 'bg-surface-overlay hover:bg-surface-overlay text-text-secondary border border-base active:scale-95',
         success:
-          'bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 text-green-400 font-semibold active:scale-95',
-        danger: 'bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 font-semibold active:scale-95',
+          'bg-status-success hover:bg-status-success border border-status-success text-status-success font-semibold active:scale-95',
+        danger: 'bg-status-error hover:bg-status-error border border-status-error text-status-error font-semibold active:scale-95',
         tab: 'relative px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200 border border-transparent',
-        'tab-active': 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.5)]',
-        'tab-inactive': 'text-slate-500 hover:text-cyan-400 hover:bg-slate-900/50 hover:border-cyan-500/20',
+        'tab-active': 'bg-neural-primary/20 text-neural-primary-light border border-neural-primary-hover/50 shadow-neural-accent',
+        'tab-inactive': 'text-muted hover:text-neural-primary-hover hover:bg-surface-elevated/50 hover:border-neural-primary/20',
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',

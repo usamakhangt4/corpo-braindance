@@ -10,7 +10,7 @@ const inputVariants = cva(
       variant: {
         default: 'border-input dark:bg-input/30 focus-visible:border-ring focus-visible:ring-ring/50',
         neural:
-          'bg-slate-950/50 border-slate-700 text-white placeholder:text-slate-500 focus-visible:border-cyan-500 focus-visible:ring-cyan-500/20 dark:bg-slate-950/50 dark:border-slate-700',
+          'bg-surface-base/50 border-base text-primary placeholder:text-muted focus-visible:border-neural-primary focus-visible:ring-neural-primary/20 dark:bg-surface-base/50 dark:border-base',
       },
       size: {
         default: 'h-9 px-3',

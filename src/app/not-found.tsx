@@ -5,17 +5,17 @@ import { ROUTES } from '@/lib/constants/routes'
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white font-sans flex flex-col items-center justify-center p-4 md:p-8">
+    <main className="min-h-screen bg-surface-base text-primary font-sans flex flex-col items-center justify-center p-4 md:p-8">
       {/* Background Gradient Blobs - Neural energy fields */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"></div>
+      <div className="absolute top-0 left-0 w-64 h-64 bg-neural-primary/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"></div>
       <div
-        className="absolute bottom-0 right-0 w-64 h-64 bg-magenta-500/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"
+        className="absolute bottom-0 right-0 w-64 h-64 bg-neural-secondary/15 rounded-full blur-3xl pointer-events-none z-0 animate-pulse"
         style={{ animationDelay: '1s' }}
       ></div>
 
       {/* Main Card - Error Display */}
       <div className="relative w-full max-w-2xl z-10">
-        <div className="relative bg-slate-950/90 backdrop-blur-sm border-2 border-red-500/40 rounded-lg p-8 md:p-12 shadow-[0_0_30px_rgba(239,68,68,0.4)] overflow-hidden">
+        <div className="relative bg-surface-base/90 backdrop-blur-sm border-2 border-status-error/40 rounded-lg p-8 md:p-12 shadow-[0_0_30px_rgba(239,68,68,0.4)] overflow-hidden">
           {/* Holographic scanline effect */}
           <div
             className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(239,68,68,0.03)_50%)] bg-size-[100%_4px] pointer-events-none opacity-30"
@@ -49,14 +49,14 @@ export default function NotFound() {
             </h1>
 
             {/* Error Message */}
-            <h2 className="text-2xl md:text-4xl font-serif font-medium text-slate-100 leading-tight mb-6">
+            <h2 className="text-2xl md:text-4xl font-serif font-medium text-primary leading-tight mb-6">
               Neural Link Disrupted
             </h2>
 
             {/* Terminal output style message */}
-            <div className="bg-slate-900/60 border border-red-500/20 rounded-lg p-5 shadow-lg backdrop-blur-sm mb-8">
-              <p className="text-red-300 font-mono text-sm leading-relaxed">
-                <span className="text-red-400 font-bold mr-2">&gt;</span>
+            <div className="bg-surface-elevated/60 border border-status-error/20 rounded-lg p-5 shadow-lg backdrop-blur-sm mb-8">
+              <p className="text-status-error font-mono text-sm leading-relaxed">
+                <span className="text-status-error font-bold mr-2">&gt;</span>
                 Target destination not found in neural network. The requested pathway has been terminated or does not
                 exist.
               </p>
@@ -74,7 +74,7 @@ export default function NotFound() {
       </div>
 
       {/* Footer text */}
-      <p className="mt-8 text-cyan-600 font-mono text-xs tracking-[0.5em] uppercase text-center">
+      <p className="mt-8 text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase text-center">
         System Status: Operational
       </p>
     </main>

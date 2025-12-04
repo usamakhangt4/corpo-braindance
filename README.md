@@ -26,15 +26,25 @@ Each generated phrase comes with:
 - A "synergy score" (80-99%) - because everything needs a score
 - A full sentence explanation - because context matters
 - Copy-to-clipboard functionality - for maximum efficiency
+- Submit to Hall of Shame (requires authentication)
 
 ### 🏆 Hall of Shame
 
 View the most cringeworthy corporate phrases submitted by users:
 
 - Top 10 phrases ranked by upvotes
-- Vote on your favorites (or least favorites)
-- Real-time leaderboard updates
+- Vote on your favorites (or least favorites) - requires authentication
+- Real-time leaderboard updates with React Query
 - See which department generated the most synergy
+- View submissions by authenticated users
+
+### 🔐 Authentication
+
+- **Email/Password Signup** with unique username
+- **Username-based Signin** - sign in with email or username
+- **Google OAuth** - one-click sign-in with Google
+- **Real-time Username Availability** checking during signup
+- **User Profiles** with display name, bio, avatar, and website
 
 ### 🎨 Modern Design
 
@@ -53,16 +63,38 @@ Or run locally:
 git clone https://github.com/yourusername/corpo-braindance.git
 cd corpo-braindance
 npm install
+```
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Set up the database by running the SQL schemas in Supabase SQL Editor (in order):
+
+1. **Buzzwords table**: Run `supabase/schema/buzzwords.sql`
+2. **Profiles table**: Run `supabase/schema/profiles.sql`
+3. **Votes table**: Run `supabase/schema/votes.sql`
+4. **Trigger setup**: Run `supabase/schema/trigger.sql` (if the trigger in profiles.sql doesn't work automatically)
+
+Then start the development server:
+
+```bash
 npm run dev
 ```
 
 ## 🛠️ Built With
 
-- **Next.js 15** - Modern React framework
-- **TypeScript** - Type-safe development
-- **Supabase** - Database and backend
-- **Tailwind CSS** - Styling
-- **shadcn/ui** - UI components
+- **Next.js 15** - Modern React framework with App Router
+- **TypeScript** - Type-safe development (strict mode)
+- **Supabase** - PostgreSQL database, authentication, and backend
+- **React Query** - Server state management with optimistic updates
+- **Zustand** - Client-side state management
+- **Server Actions** - Type-safe server mutations
+- **Tailwind CSS v4** - Utility-first styling
+- **shadcn/ui** - Accessible UI components
 
 ## 📸 Screenshots
 

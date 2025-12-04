@@ -41,6 +41,44 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Neural Theme Semantic Colors - Maps to Tailwind colors */
+  --color-neural-primary: var(--neural-primary);
+  --color-neural-primary-light: var(--neural-primary-light);
+  --color-neural-primary-dark: var(--neural-primary-dark);
+  --color-neural-primary-hover: var(--neural-primary-hover);
+
+  --color-neural-secondary: var(--neural-secondary);
+  --color-neural-secondary-light: var(--neural-secondary-light);
+
+  --color-surface-base: var(--surface-base);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-surface-card: var(--surface-elevated); /* Reuse surface-elevated */
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-accent: var(--neural-primary-hover); /* Reuse neural-primary-hover */
+
+  --color-border-base: var(--border-base);
+  --color-border-elevated: var(--border-elevated);
+  --color-border-accent: var(--neural-primary); /* Reuse neural-primary */
+  --color-border-glow: var(--neural-primary-hover); /* Reuse neural-primary-hover */
+
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-error: var(--status-error);
+  --color-status-info: var(--neural-primary-hover); /* Reuse neural-primary-hover */
+
+  --color-gradient-primary-start: var(--gradient-primary-start);
+  --color-gradient-primary-end: var(--gradient-primary-end);
+  --color-gradient-accent-start: var(--neural-primary-hover); /* Reuse neural-primary-hover */
+  --color-gradient-accent-end: var(--neural-secondary); /* Reuse neural-secondary */
+
+  --color-glow-primary: var(--glow-primary);
+  --color-glow-secondary: var(--glow-secondary);
+  --color-glow-accent: var(--glow-accent);
 }
 
 :root {
@@ -76,6 +114,53 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Neural Theme Colors - Matching Tailwind's exact RGB values */
+  /* Primary (Cyan) - matches Tailwind cyan palette */
+  --neural-primary: rgb(6, 182, 212); /* cyan-500 */
+  --neural-primary-light: rgb(103, 232, 249); /* cyan-300 */
+  --neural-primary-dark: rgb(8, 145, 178); /* cyan-600 */
+  --neural-primary-hover: rgb(34, 211, 238); /* cyan-400 */
+
+  /* Secondary (Magenta) - matches Tailwind magenta palette */
+  --neural-secondary: rgb(236, 72, 153); /* magenta-500 */
+  --neural-secondary-light: rgb(244, 114, 182); /* magenta-400 */
+
+  /* Surface Colors (Slate) - matches Tailwind slate palette */
+  --surface-base: rgb(2, 6, 23); /* slate-950 */
+  --surface-elevated: rgb(15, 23, 42); /* slate-900 */
+  --surface-overlay: rgb(30, 41, 59); /* slate-800 */
+  /* surface-card uses surface-elevated - see @theme inline */
+
+  /* Text Colors */
+  --text-primary: rgb(248, 250, 252); /* slate-50 / white */
+  --text-secondary: rgb(203, 213, 225); /* slate-300 */
+  --text-muted: rgb(100, 116, 139); /* slate-500 */
+  /* text-accent uses neural-primary-hover - see @theme inline */
+
+  /* Border Colors */
+  --border-base: rgb(51, 65, 85); /* slate-700 */
+  --border-elevated: rgb(30, 41, 59); /* slate-800 */
+  /* border-accent uses neural-primary - see @theme inline */
+  /* border-glow uses neural-primary-hover - see @theme inline */
+
+  /* Status Colors */
+  --status-success: rgb(74, 222, 128); /* green-400 */
+  --status-warning: rgb(250, 204, 21); /* yellow-400 */
+  --status-error: rgb(248, 113, 113); /* red-400 */
+  /* status-info uses neural-primary-hover - see @theme inline */
+  /* status-*-bg variants removed - use color-mix in utilities instead */
+
+  /* Gradient Colors */
+  --gradient-primary-start: rgb(79, 70, 229); /* indigo-600 */
+  --gradient-primary-end: rgb(147, 51, 234); /* purple-600 */
+  /* gradient-accent-start uses neural-primary-hover - see @theme inline */
+  /* gradient-accent-end uses neural-secondary - see @theme inline */
+
+  /* Glow/Shadow Colors (RGBA for shadows) */
+  --glow-primary: rgba(6, 182, 212, 0.3); /* cyan-500 glow */
+  --glow-secondary: rgba(236, 72, 153, 0.3); /* magenta-500 glow */
+  --glow-accent: rgba(6, 182, 212, 0.5); /* cyan-500 stronger glow */
 }
 
 .dark {
@@ -130,6 +215,153 @@
 
   .glitch-text:hover {
     animation-play-state: running;
+  }
+
+  /* Neural Theme Utility Classes - Use these instead of hardcoded Tailwind colors */
+  .bg-neural-primary {
+    background-color: var(--color-neural-primary);
+  }
+  .bg-neural-primary-light {
+    background-color: var(--color-neural-primary-light);
+  }
+  .bg-neural-primary-dark {
+    background-color: var(--color-neural-primary-dark);
+  }
+  .bg-neural-primary\/20 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 20%, transparent);
+  }
+  .bg-neural-primary\/30 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 30%, transparent);
+  }
+  .bg-neural-primary\/40 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 40%, transparent);
+  }
+  .bg-neural-primary\/50 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 50%, transparent);
+  }
+  .bg-neural-primary\/60 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 60%, transparent);
+  }
+  .bg-neural-primary\/15 {
+    background-color: color-mix(in srgb, var(--color-neural-primary) 15%, transparent);
+  }
+
+  .text-neural-primary {
+    color: var(--color-neural-primary);
+  }
+  .text-neural-primary-light {
+    color: var(--color-neural-primary-light);
+  }
+  .text-neural-primary-dark {
+    color: var(--color-neural-primary-dark);
+  }
+  .text-neural-primary-hover:hover {
+    color: var(--color-neural-primary-hover);
+  }
+
+  .border-neural-primary {
+    border-color: var(--color-neural-primary);
+  }
+  .border-neural-accent {
+    border-color: var(--color-border-accent);
+  }
+  .border-neural-glow {
+    border-color: var(--color-border-glow);
+  }
+  .border-neural-primary\/20 {
+    border-color: color-mix(in srgb, var(--color-neural-primary) 20%, transparent);
+  }
+  .border-neural-primary\/30 {
+    border-color: color-mix(in srgb, var(--color-neural-primary) 30%, transparent);
+  }
+  .border-neural-primary\/40 {
+    border-color: color-mix(in srgb, var(--color-neural-primary) 40%, transparent);
+  }
+  .border-neural-primary\/50 {
+    border-color: color-mix(in srgb, var(--color-neural-primary) 50%, transparent);
+  }
+  .border-neural-primary\/60 {
+    border-color: color-mix(in srgb, var(--color-neural-primary) 60%, transparent);
+  }
+
+  .bg-surface-base {
+    background-color: var(--color-surface-base);
+  }
+  .bg-surface-elevated {
+    background-color: var(--color-surface-elevated);
+  }
+  .bg-surface-overlay {
+    background-color: var(--color-surface-overlay);
+  }
+  .bg-surface-card {
+    background-color: var(--color-surface-card);
+  }
+  .bg-surface-base\/90 {
+    background-color: color-mix(in srgb, var(--color-surface-base) 90%, transparent);
+  }
+  .bg-surface-base\/80 {
+    background-color: color-mix(in srgb, var(--color-surface-base) 80%, transparent);
+  }
+  .bg-surface-elevated\/50 {
+    background-color: color-mix(in srgb, var(--color-surface-elevated) 50%, transparent);
+  }
+
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+  .text-accent {
+    color: var(--color-text-accent);
+  }
+
+  .border-base {
+    border-color: var(--color-border-base);
+  }
+  .border-elevated {
+    border-color: var(--color-border-elevated);
+  }
+
+  .bg-status-success {
+    background-color: color-mix(in srgb, var(--color-status-success) 20%, transparent);
+  }
+  .text-status-success {
+    color: var(--color-status-success);
+  }
+  .bg-status-warning {
+    background-color: color-mix(in srgb, var(--color-status-warning) 20%, transparent);
+  }
+  .text-status-warning {
+    color: var(--color-status-warning);
+  }
+  .bg-status-error {
+    background-color: color-mix(in srgb, var(--color-status-error) 20%, transparent);
+  }
+  .text-status-error {
+    color: var(--color-status-error);
+  }
+  .bg-status-info {
+    background-color: color-mix(in srgb, var(--color-status-info) 20%, transparent);
+  }
+  .text-status-info {
+    color: var(--color-status-info);
+  }
+
+  .shadow-neural {
+    box-shadow: 0 0 15px var(--color-glow-primary);
+  }
+  .shadow-neural-lg {
+    box-shadow: 0 0 30px var(--color-glow-primary);
+  }
+  .shadow-neural-xl {
+    box-shadow: 0 0 50px var(--color-glow-primary);
+  }
+  .shadow-neural-accent {
+    box-shadow: 0 0 15px var(--color-glow-accent);
   }
 }
 

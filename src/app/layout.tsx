@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import Navbar from '../components/Navbar'
 import SplashScreen from '../components/splash-screen'
+import { QueryProvider } from '@/lib/providers/query-provider'
 
 const orbitron = Orbitron({
   variable: '--font-geist-sans',
@@ -30,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${orbitron.variable} ${jetbrainsMono.variable} antialiased`}>
-        <SplashScreen />
-        <Suspense fallback={<div className="h-16" />}>
-          <Navbar />
-        </Suspense>
-        <div className="pt-16">{children}</div>
+        <QueryProvider>
+          <SplashScreen />
+          <Suspense fallback={<div className="h-16" />}>
+            <Navbar />
+          </Suspense>
+          <div className="pt-16">{children}</div>
+        </QueryProvider>
       </body>
     </html>
   )

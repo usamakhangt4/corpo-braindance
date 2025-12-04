@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(false)
@@ -57,7 +59,7 @@ export default function SplashScreen() {
   return (
     <div
       className={`
-        fixed inset-0 z-9999 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-500
+        fixed inset-0 z-9999 flex flex-col items-center justify-center bg-surface-base transition-opacity duration-500
         ${isAnimating ? 'opacity-0 pointer-events-none' : 'opacity-100'}
       `}
     >
@@ -73,29 +75,25 @@ export default function SplashScreen() {
           <h1 className="glitch-text cursor-default text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to from-yellow-300 via-pink-500 to-cyan-400 mb-2 uppercase tracking-tighter">
             CORPO // BRAINDANCE
           </h1>
-          <p className="text-cyan-600 font-mono text-xs tracking-[0.5em] uppercase">Loading...</p>
+          <p className="text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase">Loading...</p>
         </div>
 
         {/* Loading dots */}
-        <div className="flex space-x-2">
-          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-          <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-        </div>
+        <LoadingSpinner />
 
         {/* Progress bar */}
         <div className="w-full max-w-xs space-y-2">
-          <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-1 bg-surface-overlay rounded-full overflow-hidden">
             <div
-              className="h-full bg-linear-to-r from-cyan-400 to-magenta-400 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-linear-to-r from-neural-primary-hover to-neural-secondary-light rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
-          <p className="text-xs text-slate-400 text-center font-mono">{progress}%</p>
+          <p className="text-xs text-muted text-center font-mono">{progress}%</p>
         </div>
 
         {/* Status text */}
-        <p className="text-slate-400 text-lg text-center max-w-md">Please wait...</p>
+        <p className="text-muted text-lg text-center max-w-md">Please wait...</p>
       </div>
     </div>
   )

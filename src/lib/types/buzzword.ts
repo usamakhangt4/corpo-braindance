@@ -9,7 +9,9 @@ export interface BuzzwordEntry {
   department: string
   synergy_score: number
   upvotes: number
+  user_id: string | null
   created_at: string
+  user_vote?: 'upvote' | 'downvote' | null // Current user's vote on this buzzword
 }
 
 export interface BuzzwordData {
@@ -22,4 +24,3 @@ export interface BuzzwordData {
 export type BuzzwordRole = 'ceo' | 'sales' | 'tech'
 
 export type VoteAction = 'promote' | 'fire'
-
