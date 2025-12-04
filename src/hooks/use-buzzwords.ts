@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { buzzwordDb } from '@/lib/db/buzzword-db'
 import { getSupabaseClient } from '@/lib/supabase/client'
@@ -154,6 +155,10 @@ export function useVoteBuzzword() {
       // Invalidate queries to refetch with updated vote counts and user_vote
       queryClient.invalidateQueries({ queryKey: buzzwordKeys.all, refetchType: 'active' })
     },
+    onError: (error) => {
+      // Error toast is handled in the component using toast.promise
+      console.error('Vote error:', error)
+    },
   })
 }
 
@@ -224,6 +229,10 @@ export function useSubmitBuzzword() {
       // Invalidate queries to refetch with new data
       // Use refetchType: 'active' to only refetch active queries
       queryClient.invalidateQueries({ queryKey: buzzwordKeys.all, refetchType: 'active' })
+    },
+    onError: (error) => {
+      // Error toast is handled in the component using toast.promise
+      console.error('Submit buzzword error:', error)
     },
   })
 }

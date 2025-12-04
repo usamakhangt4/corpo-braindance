@@ -8,6 +8,7 @@ import { useAuthStore } from '@/lib/stores/use-auth-store'
 import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
 import { useSubmitBuzzword } from '@/hooks/use-buzzwords'
 import { NeuralCard } from '@/components/NeuralCard'
+import { toast } from 'sonner'
 
 export default function Home() {
   // Use Zustand stores for UI state
@@ -26,7 +27,7 @@ export default function Home() {
   const copyToClipboard = () => {
     if (!data) return
     navigator.clipboard.writeText(`${data.phrase}\n"${data.fullSentence}"`)
-    alert('Synergy successfully leveraged to clipboard!')
+    toast.success('Synergy successfully leveraged to clipboard!')
   }
 
   const submitToHR = async () => {
@@ -34,16 +35,21 @@ export default function Home() {
 
     // Check authentication client-side first
     if (!user) {
-      alert('Please sign in to submit buzzwords to HR.')
+      toast.warning('Please sign in to submit buzzwords to HR.')
       return
     }
 
     try {
-      await submitBuzzword.mutateAsync(data)
-      alert('Filed to Permanent Record.')
+      await toast.promise(submitBuzzword.mutateAsync(data), {
+        loading: 'Submitting to HR...',
+        success: 'Filed to Permanent Record.',
+        error: (error) => {
+          const errorMessage = error instanceof Error ? error.message : 'HR rejected your submission.'
+          return errorMessage
+        },
+      })
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'HR rejected your submission.'
-      alert(`Error: ${errorMessage}`)
+      // Error is already handled by toast.promise
       console.error(error)
     }
   }
@@ -135,10 +141,10 @@ export default function Home() {
           variant="slate"
           size="xl"
           onClick={() => {
+            copyToClipboard()
             if (user && user.email) {
               submitToHR()
             }
-            copyToClipboard()
           }}
           className="w-full md:w-1/2"
         >

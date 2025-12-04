@@ -5,6 +5,7 @@ import './globals.css'
 import Navbar from '../components/Navbar'
 import SplashScreen from '../components/splash-screen'
 import { QueryProvider } from '@/lib/providers/query-provider'
+import { Toaster } from '@/components/ui/sonner'
 
 const orbitron = Orbitron({
   variable: '--font-geist-sans',
@@ -37,6 +38,7 @@ export default function RootLayout({
             <Navbar />
           </Suspense>
           <div className="pt-16">{children}</div>
+          <Toaster position="top-center" richColors />
         </QueryProvider>
       </body>
     </html>
