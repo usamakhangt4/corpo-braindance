@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { useVotingStore } from '@/lib/stores/use-voting-store'
 import { useAuthStore } from '@/lib/stores/use-auth-store'
 import { useTopBuzzwords, useVoteBuzzword } from '@/hooks/use-buzzwords'
@@ -59,20 +60,28 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
     }
 
     try {
-      await voteBuzzword.mutateAsync({
-        buzzwordId: id,
-        userId: user.id,
-        voteType: action === 'promote' ? 'upvote' : 'downvote',
-      })
+      await toast.promise(
+        voteBuzzword.mutateAsync({
+          buzzwordId: id,
+          userId: user.id,
+          voteType: action === 'promote' ? 'upvote' : 'downvote',
+        }),
+        {
+          loading: action === 'promote' ? 'Promoting buzzword...' : 'Firing buzzword...',
+          success: action === 'promote' ? 'Vote recorded successfully!' : 'Vote recorded successfully!',
+          error: (error) => {
+            // If authentication error, show auth modal
+            if (error instanceof Error && (error.message.includes('authentication') || error.message.includes('401'))) {
+              setAuthModalOpen(true)
+              return 'Authentication required'
+            }
+            return 'Failed to vote. Please try again.'
+          },
+        },
+      )
     } catch (error) {
+      // Error is already handled by toast.promise
       console.error('Error voting:', error)
-      // If authentication error, show auth modal
-      if (error instanceof Error && (error.message.includes('authentication') || error.message.includes('401'))) {
-        setAuthModalOpen(true)
-      } else {
-        // Other errors - could show a toast notification here
-        alert('Failed to vote. Please try again.')
-      }
     } finally {
       removeVotingId(id)
     }
