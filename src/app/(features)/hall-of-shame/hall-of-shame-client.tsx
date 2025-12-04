@@ -1,11 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useVotingStore } from '@/lib/stores/use-voting-store'
 import { useAuthStore } from '@/lib/stores/use-auth-store'
-import { ThumbsUp, ThumbsDown } from 'lucide-react'
+import { useTopBuzzwords, useVoteBuzzword } from '@/hooks/use-buzzwords'
+import { HALL_OF_SHAME_LIMIT } from '@/lib/constants/buzzwords'
+import { MessageSquare, Share2 } from 'lucide-react'
 import type { VoteAction, BuzzwordEntry } from '@/lib/types/buzzword'
 import { AuthModal } from '@/components/auth-modal'
+import { useQueryClient } from '@tanstack/react-query'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { ErrorMessage } from '@/components/ErrorMessage'
+import { EmptyState } from '@/components/EmptyState'
+import { VotingControls } from '@/components/VotingControls'
 
 interface HallOfShameClientProps {
   initialEntries: BuzzwordEntry[]
@@ -15,68 +22,91 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [mode, setMode] = useState<'login' | 'signup'>('login')
 
-  // Use Zustand stores
-  const { entries, loading, votingIds, handleVote, setEntries, fetchTopPhrases } = useVotingStore()
+  // React Query for data fetching
   const { user } = useAuthStore()
+  const { data: entries = initialEntries, isLoading: loading, error } = useTopBuzzwords(HALL_OF_SHAME_LIMIT, user?.id ?? null)
+  const voteBuzzword = useVoteBuzzword()
+  const queryClient = useQueryClient()
 
-  // Initialize with server data, or fetch if empty (fallback for RLS issues)
-  useEffect(() => {
-    if (initialEntries.length > 0) {
-      setEntries(initialEntries)
-    } else {
-      // If server fetch failed (e.g., RLS blocking), try client-side fetch
-      fetchTopPhrases()
-    }
-  }, [initialEntries, setEntries, fetchTopPhrases])
+  // Zustand for UI state only
+  const { votingIds, addVotingId, removeVotingId, isVoting } = useVotingStore()
 
-  const handleVoteClick = (id: number, action: VoteAction) => {
+  const handleVoteClick = async (id: number, action: VoteAction) => {
     if (!user) {
       setAuthModalOpen(true)
       return
     }
-    handleVote(id, action)
+
+    if (isVoting(id)) return
+
+    const currentEntry = entries.find((e) => e.id === id)
+    if (!currentEntry) return
+
+    addVotingId(id)
+
+    // Determine vote type based on action and current vote state
+    const currentVote = currentEntry.user_vote
+    let voteType: 'upvote' | 'downvote'
+
+    if (action === 'promote') {
+      // If already upvoted, remove vote (unvote)
+      // Otherwise, upvote
+      voteType = currentVote === 'upvote' ? 'upvote' : 'upvote' // Will be handled by voteBuzzword logic
+    } else {
+      // If already downvoted, remove vote (unvote)
+      // Otherwise, downvote
+      voteType = currentVote === 'downvote' ? 'downvote' : 'downvote' // Will be handled by voteBuzzword logic
+    }
+
+    try {
+      await voteBuzzword.mutateAsync({
+        buzzwordId: id,
+        userId: user.id,
+        voteType: action === 'promote' ? 'upvote' : 'downvote',
+      })
+    } catch (error) {
+      console.error('Error voting:', error)
+      // If authentication error, show auth modal
+      if (error instanceof Error && (error.message.includes('authentication') || error.message.includes('401'))) {
+        setAuthModalOpen(true)
+      } else {
+        // Other errors - could show a toast notification here
+        alert('Failed to vote. Please try again.')
+      }
+    } finally {
+      removeVotingId(id)
+    }
   }
 
   return (
     <>
-      <main className="min-h-screen bg-slate-950 text-white font-sans flex flex-col items-center p-4 md:p-8">
+      <main className="min-h-screen bg-surface-base text-primary font-sans flex flex-col items-center p-4 md:p-8">
         {/* Header */}
         <header className="w-full max-w-4xl text-center mb-10 mt-8">
           <h1 className="glitch-text cursor-default text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to from-yellow-300 via-pink-500 to-cyan-400 mb-2 uppercase tracking-tighter">
             HALL // OF SHAME
           </h1>
-          <p className="text-cyan-600 font-mono text-xs tracking-[0.5em] uppercase mb-2">Performance Review Portal</p>
-          <p className="text-slate-400 text-lg">Top 10 Most Cringeworthy Phrases Ranked by Upvotes</p>
+          <p className="text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase mb-2">Performance Review Portal</p>
+          <p className="text-muted text-lg">Top 10 Most Cringeworthy Phrases Ranked by Upvotes</p>
         </header>
 
         {/* Rankings List */}
         <div className="w-full max-w-4xl space-y-4">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-6">
-              {/* Loading Animation */}
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                <div
-                  className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce"
-                  style={{ animationDelay: '0.2s' }}
-                ></div>
-                <div
-                  className="w-3 h-3 bg-cyan-400 rounded-full animate-bounce"
-                  style={{ animationDelay: '0.4s' }}
-                ></div>
-              </div>
-              {/* Loading Message */}
-              <p className="text-cyan-400 font-mono text-sm tracking-wider uppercase">Loading Performance Reviews...</p>
-            </div>
+            <LoadingSpinner message="Loading Performance Reviews..." className="py-20" />
+          ) : error ? (
+            <ErrorMessage
+              message={error instanceof Error ? error.message : 'An unknown error occurred'}
+              variant="destructive"
+              className="py-20"
+            />
           ) : entries.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-slate-500 text-lg">No entries yet. Be the first to submit to HR!</p>
-            </div>
+            <EmptyState message="No entries yet. Be the first to submit to HR!" />
           ) : (
             entries.map((entry, index) => (
               <div
                 key={entry.id}
-                className="relative bg-slate-900 border border-slate-700 rounded-2xl p-6 shadow-xl overflow-hidden transition-all hover:border-cyan-500/50 group"
+                className="relative bg-surface-elevated border border-base rounded-2xl p-6 shadow-xl overflow-hidden transition-all hover:border-neural-primary/50 group"
               >
                 {/* Background Gradient Blob */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -87,12 +117,12 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg border-2 ${
                         index === 0
-                          ? 'bg-yellow-500/20 border-yellow-500 text-yellow-400'
+                          ? 'bg-status-warning/20 border-status-warning text-status-warning'
                           : index === 1
-                          ? 'bg-slate-600/20 border-slate-400 text-slate-300'
+                          ? 'bg-surface-overlay/20 border-secondary text-secondary'
                           : index === 2
                           ? 'bg-orange-500/20 border-orange-500 text-orange-400'
-                          : 'bg-slate-700/20 border-slate-600 text-slate-400'
+                          : 'bg-surface-overlay/20 border-elevated text-muted'
                       }`}
                     >
                       {index + 1}
@@ -102,9 +132,9 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 uppercase font-semibold">Synergy:</span>
+                    <span className="text-xs text-muted uppercase font-semibold">Synergy:</span>
                     <span
-                      className={`text-lg font-bold ${entry.synergy_score > 90 ? 'text-green-400' : 'text-yellow-400'}`}
+                      className={`text-lg font-bold ${entry.synergy_score > 90 ? 'text-status-success' : 'text-status-warning'}`}
                     >
                       {entry.synergy_score}%
                     </span>
@@ -112,41 +142,47 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
                 </div>
 
                 {/* Phrase */}
-                <h2 className="text-2xl md:text-3xl font-serif font-medium text-slate-100 leading-tight mb-3">
+                <h2 className="text-2xl md:text-3xl font-serif font-medium text-primary leading-tight mb-3">
                   "{entry.phrase}"
                 </h2>
 
                 {/* Meaning */}
-                <div className="bg-slate-950/50 rounded-xl p-4 border border-slate-800/50 backdrop-blur-sm mb-4">
-                  <p className="text-slate-400 font-mono text-sm leading-relaxed">
+                <div className="bg-surface-base/50 rounded-xl p-4 border border-elevated/50 backdrop-blur-sm mb-4">
+                  <p className="text-muted font-mono text-sm leading-relaxed">
                     <span className="text-indigo-400 font-bold mr-2">&gt;</span>
                     {entry.meaning}
                   </p>
                 </div>
 
-                {/* Voting Section */}
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800 flex-col md:flex-row gap-2">
+                {/* Voting Section - Reddit Style Horizontal */}
+                <div className="flex items-center justify-between pt-3 border-t border-elevated">
+                  {/* Left side - Voting controls */}
+                  <VotingControls
+                    upvotes={entry.upvotes}
+                    userVote={entry.user_vote}
+                    onUpvote={() => handleVoteClick(entry.id, 'promote')}
+                    onDownvote={() => handleVoteClick(entry.id, 'fire')}
+                    disabled={isVoting(entry.id)}
+                    isLoading={voteBuzzword.isPending}
+                  />
+
+                  {/* Right side - Reply and Share buttons */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 uppercase font-semibold">Performance Review:</span>
-                    <span className="text-cyan-400 font-bold text-lg">{entry.upvotes}</span>
-                    <span className="text-xs text-slate-500">upvotes</span>
-                  </div>
-                  <div className="flex items-center gap-3">
                     <button
-                      onClick={() => handleVoteClick(entry.id, 'promote')}
-                      disabled={votingIds.has(entry.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                      disabled
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                      aria-label="Reply"
                     >
-                      <ThumbsUp className="w-4 h-4" />
-                      Promote
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Reply</span>
                     </button>
                     <button
-                      onClick={() => handleVoteClick(entry.id, 'fire')}
-                      disabled={votingIds.has(entry.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-400 font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                      disabled
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                      aria-label="Share"
                     >
-                      <ThumbsDown className="w-4 h-4" />
-                      Fire
+                      <Share2 className="w-4 h-4" />
+                      <span>Share</span>
                     </button>
                   </div>
                 </div>
@@ -163,7 +199,8 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
         mode={mode}
         onSuccess={() => {
           setMode('login')
-          useVotingStore.getState().refreshEntries()
+          // Only refetch active queries to avoid rate limiting
+          queryClient.invalidateQueries({ queryKey: ['buzzwords'], refetchType: 'active' })
         }}
         title={mode === 'login' ? 'Sign in to Vote' : 'Sign up to Vote'}
         description="You need to be authenticated to vote on buzzwords"

@@ -32,8 +32,9 @@ interface AuthStore {
 
   // Async actions
   initialize: () => Promise<void>
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>
+  signIn: (emailOrUsername: string, password: string) => Promise<{ error: Error | null }>
+  signUp: (email: string, password: string, username: string) => Promise<{ error: Error | null }>
+  signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
 }
 
@@ -74,8 +75,22 @@ export const useAuthStore = create<AuthStore>((set) => {
       }
     },
 
-    signIn: async (email: string, password: string) => {
+    signIn: async (emailOrUsername: string, password: string) => {
       try {
+        // Check if input is email or username
+        const isEmail = emailOrUsername.includes('@')
+        let email = emailOrUsername
+
+        // If username, look up email
+        if (!isEmail) {
+          const { getEmailByUsername } = await import('@/app/actions/auth')
+          const foundEmail = await getEmailByUsername(emailOrUsername)
+          if (!foundEmail) {
+            return { error: new Error('Invalid username or password') }
+          }
+          email = foundEmail
+        }
+
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         return { error: error ? new Error(error.message) : null }
       } catch (error) {
@@ -83,18 +98,55 @@ export const useAuthStore = create<AuthStore>((set) => {
       }
     },
 
-    signUp: async (email: string, password: string) => {
+    signUp: async (email: string, password: string, username: string) => {
       try {
-        const { error } = await supabase.auth.signUp({ email, password })
-        return { error: error ? new Error(error.message) : null }
+        // Sign up user
+        const { data, error } = await supabase.auth.signUp({ email, password })
+        
+        if (error) {
+          return { error: new Error(error.message) }
+        }
+
+        // If user was created, create profile with username
+        if (data.user) {
+          const { createUserProfile } = await import('@/app/actions/auth')
+          const { success, error: profileError } = await createUserProfile(data.user.id, username)
+          
+          if (!success) {
+            // User created but profile failed - sign out the user to prevent orphaned account
+            await supabase.auth.signOut()
+            return { error: new Error(profileError || 'Failed to create profile. Please try again.') }
+          }
+        }
+
+        return { error: null }
       } catch (error) {
         return { error: error instanceof Error ? error : new Error('Sign up failed') }
       }
     },
 
+    signInWithGoogle: async () => {
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+          },
+        })
+        return { error: error ? new Error(error.message) : null }
+      } catch (error) {
+        return { error: error instanceof Error ? error : new Error('Google sign in failed') }
+      }
+    },
+
     signOut: async () => {
-      await supabase.auth.signOut()
-      set({ user: null })
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.error('Sign out error:', error)
+      } finally {
+        set({ user: null, loading: false })
+      }
     },
   }
 })

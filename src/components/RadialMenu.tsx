@@ -236,7 +236,7 @@ export default function RadialMenu({
         >
           {/* Inner glow ring */}
           <div
-            className="absolute inset-2 rounded-full border border-cyan-500/30"
+            className="absolute inset-2 rounded-full border border-neural-primary/30"
             style={{
               boxShadow: 'inset 0 0 25px rgba(6, 182, 212, 0.2)',
             }}
@@ -316,14 +316,14 @@ export default function RadialMenu({
             onClick={onBack}
             className={cn(
               'absolute w-12 h-12 rounded-lg z-25',
-              'bg-slate-900/95 backdrop-blur-md border-2',
-              'border-cyan-500/50 shadow-lg shadow-cyan-500/20',
+              'bg-surface-elevated/95 backdrop-blur-md border-2',
+              'border-neural-primary/50 shadow-lg shadow-neural',
               'flex items-center justify-center',
               'transition-all duration-400 ease-out',
-              'hover:scale-110 hover:z-30 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-500/40',
+              'hover:scale-110 hover:z-30 hover:border-neural-primary-hover hover:shadow-xl hover:shadow-neural-accent',
               'focus-visible:outline-none focus-visible:ring-2',
-              'focus-visible:ring-cyan-500/50 focus-visible:ring-offset-2',
-              'focus-visible:ring-offset-slate-950',
+              'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
+              'focus-visible:ring-offset-surface-base',
             )}
             style={{
               left: `${menuSize / 2 - 24}px`,
@@ -334,8 +334,8 @@ export default function RadialMenu({
             }}
             aria-label="Back"
           >
-            <div className="absolute inset-0 bg-cyan-500/10 rounded-lg blur-lg" />
-            <ArrowLeft className="relative z-10 w-5 h-5 text-cyan-400" />
+            <div className="absolute inset-0 bg-neural-primary/10 rounded-lg blur-lg" />
+            <ArrowLeft className="relative z-10 w-5 h-5 text-neural-primary-hover" />
           </button>
         )}
 
@@ -352,14 +352,14 @@ export default function RadialMenu({
                   onClick={(e: React.MouseEvent) => handleItemClick(centerItem, e)}
                   className={cn(
                     'absolute w-14 h-14 rounded-lg z-25',
-                    'bg-slate-900/95 backdrop-blur-md border-2',
+                    'bg-surface-elevated/95 backdrop-blur-md border-2',
                     'flex items-center justify-center',
                     'transition-all duration-400 ease-out',
                     'hover:scale-110 hover:z-30',
                     'focus-visible:outline-none focus-visible:ring-2',
-                    'focus-visible:ring-cyan-500/50 focus-visible:ring-offset-2',
-                    'focus-visible:ring-offset-slate-950',
-                    'border-cyan-500/50 shadow-lg shadow-cyan-500/20 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-500/40',
+                    'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
+                    'focus-visible:ring-offset-surface-base',
+                    'border-neural-primary/50 shadow-lg shadow-neural hover:border-neural-primary-hover hover:shadow-xl hover:shadow-neural-accent',
                   )}
                   style={{
                     left: `${menuSize / 2 - 28}px`,
@@ -373,10 +373,10 @@ export default function RadialMenu({
                   <div
                     className={cn(
                       'absolute inset-0 rounded-lg blur-lg transition-opacity duration-300',
-                      'bg-cyan-500/10 opacity-50',
+                      'bg-neural-primary/10 opacity-50',
                     )}
                   />
-                  <Icon className="relative z-10 w-6 h-6 text-cyan-400" />
+                  <Icon className="relative z-10 w-6 h-6 text-neural-primary-hover" />
                 </button>
               )
             }
@@ -387,16 +387,16 @@ export default function RadialMenu({
                 onClick={(e: React.MouseEvent) => handleItemClick(centerItem, e)}
                 className={cn(
                   'absolute w-14 h-14 rounded-lg z-25',
-                  'bg-slate-900/95 backdrop-blur-md border-2',
+                  'bg-surface-elevated/95 backdrop-blur-md border-2',
                   'flex items-center justify-center',
                   'transition-all duration-400 ease-out',
                   'hover:scale-110 hover:z-30',
                   'focus-visible:outline-none focus-visible:ring-2',
-                  'focus-visible:ring-cyan-500/50 focus-visible:ring-offset-2',
-                  'focus-visible:ring-offset-slate-950',
+                  'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
+                  'focus-visible:ring-offset-surface-base',
                   isActive
-                    ? 'border-cyan-400 shadow-xl shadow-cyan-500/60 bg-cyan-500/25'
-                    : 'border-cyan-500/50 shadow-lg shadow-cyan-500/20 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-500/40',
+                    ? 'border-neural-primary-hover shadow-xl shadow-neural-accent bg-neural-primary/25'
+                    : 'border-neural-primary/50 shadow-lg shadow-neural hover:border-neural-primary-hover hover:shadow-xl hover:shadow-neural-accent',
                 )}
                 style={{
                   left: `${menuSize / 2 - 28}px`,
@@ -410,10 +410,10 @@ export default function RadialMenu({
                 <div
                   className={cn(
                     'absolute inset-0 rounded-lg blur-lg transition-opacity duration-300',
-                    isActive ? 'bg-cyan-500/20 opacity-100' : 'bg-cyan-500/10 opacity-50',
+                    isActive ? 'bg-neural-primary/20 opacity-100' : 'bg-neural-primary/10 opacity-50',
                   )}
                 />
-                <Icon className="relative z-10 w-6 h-6 text-cyan-400" />
+                <Icon className="relative z-10 w-6 h-6 text-neural-primary-hover" />
               </Link>
             )
           })()}
@@ -433,20 +433,20 @@ export default function RadialMenu({
             onMouseLeave: () => setHoveredIndex(null),
             className: cn(
               'absolute w-16 h-16 rounded-full z-20',
-              'bg-slate-900/95 backdrop-blur-md border-2',
+              'bg-surface-elevated/95 backdrop-blur-md border-2',
               'flex flex-col items-center justify-center gap-1',
               'transition-all duration-400 ease-out',
               'hover:scale-115 hover:z-30',
               'focus-visible:outline-none focus-visible:ring-2',
-              'focus-visible:ring-cyan-500/50 focus-visible:ring-offset-2',
-              'focus-visible:ring-offset-slate-950',
+              'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
+              'focus-visible:ring-offset-surface-base',
               isActive
-                ? 'border-cyan-400 shadow-lg shadow-cyan-500/50 bg-cyan-500/20'
+                ? 'border-neural-primary-hover shadow-lg shadow-neural-accent bg-neural-primary/20'
                 : isLogout
-                ? 'border-red-500/50 shadow-lg shadow-red-500/20 hover:border-red-400 hover:shadow-xl hover:shadow-red-500/40'
-                : 'border-cyan-500/50 shadow-lg shadow-cyan-500/20',
-              isHovered && !isLogout && 'border-cyan-400 shadow-xl shadow-cyan-500/70 scale-115 bg-cyan-500/30',
-              isHovered && isLogout && 'border-red-400 shadow-xl shadow-red-500/60 scale-115 bg-red-500/20',
+                ? 'border-status-error/50 shadow-lg hover:border-status-error hover:shadow-xl'
+                : 'border-neural-primary/50 shadow-lg shadow-neural',
+              isHovered && !isLogout && 'border-neural-primary-hover shadow-xl shadow-neural-accent scale-115 bg-neural-primary/30',
+              isHovered && isLogout && 'border-status-error shadow-xl scale-115 bg-status-error/20',
             ),
             style: {
               left: `${menuSize / 2 + pos.x - itemSize / 2}px`,
@@ -468,7 +468,7 @@ export default function RadialMenu({
                 <div
                   className={cn(
                     'absolute inset-0 rounded-full blur-xl transition-opacity duration-300',
-                    isHovered && isLogout ? 'bg-red-500/30 opacity-100' : 'bg-cyan-500/10 opacity-50',
+                    isHovered && isLogout ? 'bg-status-error/30 opacity-100' : 'bg-neural-primary/10 opacity-50',
                   )}
                 />
 
@@ -476,7 +476,7 @@ export default function RadialMenu({
                 <Icon
                   className={cn(
                     'relative z-10 w-6 h-6 transition-colors duration-300',
-                    isHovered && isLogout ? 'text-red-300' : 'text-red-400/70',
+                    isHovered && isLogout ? 'text-status-error' : 'text-status-error/70',
                   )}
                 />
 
@@ -484,12 +484,12 @@ export default function RadialMenu({
                 <div
                   className={cn(
                     'absolute -bottom-9 px-2.5 py-1 rounded-md z-40',
-                    'bg-slate-900/98 border pointer-events-none whitespace-nowrap',
+                    'bg-surface-elevated/98 border pointer-events-none whitespace-nowrap',
                     'text-xs font-mono uppercase tracking-wider',
                     'backdrop-blur-md shadow-lg',
                     'transition-all duration-300',
-                    isHovered && isLogout && 'text-red-300 border-red-400/80 scale-110',
-                    'border-red-500/50 text-red-400',
+                    isHovered && isLogout && 'text-status-error border-status-error/80 scale-110',
+                    'border-status-error/50 text-status-error',
                   )}
                   style={{
                     transform: `translateX(${pos.x > 0 ? '-50%' : pos.x < 0 ? '50%' : '0'})`,
@@ -514,7 +514,7 @@ export default function RadialMenu({
               <div
                 className={cn(
                   'absolute inset-0 rounded-full blur-xl transition-opacity duration-300',
-                  isActive || (isHovered && !isLogout) ? 'bg-cyan-500/40 opacity-100' : 'bg-cyan-500/10 opacity-50',
+                  isActive || (isHovered && !isLogout) ? 'bg-neural-primary/40 opacity-100' : 'bg-neural-primary/10 opacity-50',
                 )}
               />
 
@@ -522,7 +522,7 @@ export default function RadialMenu({
               <Icon
                 className={cn(
                   'relative z-10 w-6 h-6 transition-colors duration-300',
-                  isActive || (isHovered && !isLogout) ? 'text-cyan-300' : 'text-cyan-500/70',
+                  isActive || (isHovered && !isLogout) ? 'text-neural-primary-light' : 'text-neural-primary/70',
                 )}
               />
 
@@ -530,13 +530,13 @@ export default function RadialMenu({
               <div
                 className={cn(
                   'absolute -bottom-9 px-2.5 py-1 rounded-md z-40',
-                  'bg-slate-900/98 border pointer-events-none whitespace-nowrap',
+                  'bg-surface-elevated/98 border pointer-events-none whitespace-nowrap',
                   'text-xs font-mono uppercase tracking-wider',
                   'backdrop-blur-md shadow-lg',
                   'transition-all duration-300',
-                  isHovered && !isLogout && 'text-cyan-300 border-cyan-400/80 scale-110',
-                  isActive && 'text-cyan-300 border-cyan-400/80',
-                  'border-cyan-500/50 text-cyan-400',
+                  isHovered && !isLogout && 'text-neural-primary-light border-neural-primary-hover/80 scale-110',
+                  isActive && 'text-neural-primary-light border-neural-primary-hover/80',
+                  'border-neural-primary/50 text-neural-primary-hover',
                 )}
                 style={{
                   transform: `translateX(${pos.x > 0 ? '-50%' : pos.x < 0 ? '50%' : '0'})`,

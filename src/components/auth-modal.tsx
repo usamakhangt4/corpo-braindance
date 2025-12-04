@@ -22,17 +22,17 @@ export function AuthModal({ open, onOpenChange, mode: initialMode = 'login', tit
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          'bg-slate-900/95 border-2 border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.3)]',
+          'bg-surface-elevated/95 border-2 border-neural-primary/30 shadow-neural-lg',
           'backdrop-blur-sm sm:max-w-md',
         )}
       >
         <DialogHeader>
           <DialogTitle
-            className={cn('text-2xl font-bold text-cyan-300 font-mono uppercase tracking-wider', 'text-left')}
+            className={cn('text-2xl font-bold text-neural-primary-light font-mono uppercase tracking-wider', 'text-left')}
           >
             {title || (mode === 'login' ? 'Access Neural Link' : 'Register Neural Link')}
           </DialogTitle>
-          <DialogDescription className="text-slate-400 text-left">
+          <DialogDescription className="text-muted text-left">
             {description ||
               (mode === 'login'
                 ? 'Enter your credentials to establish connection'

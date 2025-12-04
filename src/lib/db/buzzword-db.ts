@@ -15,16 +15,20 @@ export interface GetAllBuzzwordsOptions {
 }
 
 export interface IBuzzwordDb {
-  getTopBuzzwords(limit: number): Promise<BuzzwordEntry[]>
-  getAllBuzzwords(options?: GetAllBuzzwordsOptions): Promise<BuzzwordEntry[]>
-  createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes'>): Promise<BuzzwordEntry>
+  getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]>
+  getAllBuzzwords(options?: GetAllBuzzwordsOptions & { userId?: string | null }): Promise<BuzzwordEntry[]>
+  createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string }): Promise<BuzzwordEntry>
   updateUpvotes(id: number, upvotes: number): Promise<BuzzwordEntry>
-  getById(id: number): Promise<BuzzwordEntry | null>
+  getById(id: number, userId?: string | null): Promise<BuzzwordEntry | null>
+  voteBuzzword(buzzwordId: number, userId: string, voteType: 'upvote' | 'downvote'): Promise<void>
+  getUserVote(buzzwordId: number, userId: string): Promise<'upvote' | 'downvote' | null>
 }
 
 class BuzzwordDb implements IBuzzwordDb {
-  async getTopBuzzwords(limit: number): Promise<BuzzwordEntry[]> {
+  async getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]> {
     const supabase = await getSupabaseClient()
+    
+    // Fetch buzzwords
     const { data, error } = await supabase
       .from('buzzwords')
       .select('*')
@@ -41,11 +45,36 @@ class BuzzwordDb implements IBuzzwordDb {
       })
       throw error
     }
-    return (data || []) as BuzzwordEntry[]
+
+    const entries = (data || []) as BuzzwordEntry[]
+
+    // If user is authenticated, fetch their votes
+    if (userId) {
+      const buzzwordIds = entries.map((e) => e.id)
+      const { data: votes } = await supabase
+        .from('buzzword_votes')
+        .select('buzzword_id, vote_type')
+        .eq('user_id', userId)
+        .in('buzzword_id', buzzwordIds)
+
+      // Map votes to entries
+      const voteMap = new Map<number, 'upvote' | 'downvote'>()
+      votes?.forEach((vote) => {
+        voteMap.set(vote.buzzword_id, vote.vote_type as 'upvote' | 'downvote')
+      })
+
+      // Add user_vote to each entry
+      return entries.map((entry) => ({
+        ...entry,
+        user_vote: voteMap.get(entry.id) || null,
+      }))
+    }
+
+    return entries
   }
 
-  async getAllBuzzwords(options: GetAllBuzzwordsOptions = {}): Promise<BuzzwordEntry[]> {
-    const { limit = 50, offset = 0, sortBy = 'newest' } = options
+  async getAllBuzzwords(options: GetAllBuzzwordsOptions & { userId?: string | null } = {}): Promise<BuzzwordEntry[]> {
+    const { limit = 50, offset = 0, sortBy = 'newest', userId } = options
     const supabase = await getSupabaseClient()
 
     let query = supabase.from('buzzwords').select('*')
@@ -69,10 +98,37 @@ class BuzzwordDb implements IBuzzwordDb {
 
     const { data, error } = await query
     if (error) throw error
-    return (data || []) as BuzzwordEntry[]
+
+    const entries = (data || []) as BuzzwordEntry[]
+
+    // If user is authenticated, fetch their votes
+    if (userId) {
+      const buzzwordIds = entries.map((e) => e.id)
+      if (buzzwordIds.length > 0) {
+        const { data: votes } = await supabase
+          .from('buzzword_votes')
+          .select('buzzword_id, vote_type')
+          .eq('user_id', userId)
+          .in('buzzword_id', buzzwordIds)
+
+        // Map votes to entries
+        const voteMap = new Map<number, 'upvote' | 'downvote'>()
+        votes?.forEach((vote) => {
+          voteMap.set(vote.buzzword_id, vote.vote_type as 'upvote' | 'downvote')
+        })
+
+        // Add user_vote to each entry
+        return entries.map((entry) => ({
+          ...entry,
+          user_vote: voteMap.get(entry.id) || null,
+        }))
+      }
+    }
+
+    return entries
   }
 
-  async createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes'>): Promise<BuzzwordEntry> {
+  async createBuzzword(data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string }): Promise<BuzzwordEntry> {
     const supabase = await getSupabaseClient()
     const { data: result, error } = await supabase
       .from('buzzwords')
@@ -81,6 +137,7 @@ class BuzzwordDb implements IBuzzwordDb {
         meaning: data.meaning,
         department: data.department,
         synergy_score: data.synergy_score,
+        user_id: data.user_id,
       })
       .select()
       .single()
@@ -98,11 +155,85 @@ class BuzzwordDb implements IBuzzwordDb {
     return data as BuzzwordEntry
   }
 
-  async getById(id: number): Promise<BuzzwordEntry | null> {
+  async getById(id: number, userId?: string | null): Promise<BuzzwordEntry | null> {
     const supabase = await getSupabaseClient()
     const { data, error } = await supabase.from('buzzwords').select('*').eq('id', id).single()
     if (error) return null
-    return data as BuzzwordEntry
+
+    const entry = data as BuzzwordEntry
+
+    // If user is authenticated, fetch their vote
+    if (userId) {
+      const { data: vote } = await supabase
+        .from('buzzword_votes')
+        .select('vote_type')
+        .eq('buzzword_id', id)
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      return {
+        ...entry,
+        user_vote: (vote?.vote_type as 'upvote' | 'downvote') || null,
+      }
+    }
+
+    return entry
+  }
+
+  async voteBuzzword(buzzwordId: number, userId: string, voteType: 'upvote' | 'downvote'): Promise<void> {
+    const supabase = await getSupabaseClient()
+
+    // Check if user already voted
+    const { data: existingVote } = await supabase
+      .from('buzzword_votes')
+      .select('vote_type')
+      .eq('buzzword_id', buzzwordId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (existingVote) {
+      if (existingVote.vote_type === voteType) {
+        // Same vote - remove it (unvote)
+        const { error } = await supabase
+          .from('buzzword_votes')
+          .delete()
+          .eq('buzzword_id', buzzwordId)
+          .eq('user_id', userId)
+
+        if (error) throw error
+      } else {
+        // Different vote - update it
+        const { error } = await supabase
+          .from('buzzword_votes')
+          .update({ vote_type: voteType, updated_at: new Date().toISOString() })
+          .eq('buzzword_id', buzzwordId)
+          .eq('user_id', userId)
+
+        if (error) throw error
+      }
+    } else {
+      // No existing vote - insert new vote
+      const { error } = await supabase.from('buzzword_votes').insert({
+        buzzword_id: buzzwordId,
+        user_id: userId,
+        vote_type: voteType,
+      })
+
+      if (error) throw error
+    }
+  }
+
+  async getUserVote(buzzwordId: number, userId: string): Promise<'upvote' | 'downvote' | null> {
+    const supabase = await getSupabaseClient()
+    const { data, error } = await supabase
+      .from('buzzword_votes')
+      .select('vote_type')
+      .eq('buzzword_id', buzzwordId)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (error || !data) return null
+    return (data.vote_type as 'upvote' | 'downvote') || null
   }
 }
 

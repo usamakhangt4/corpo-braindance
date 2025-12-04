@@ -1,8 +1,8 @@
 'use server'
 
 import { BUZZWORD_DATA } from '@/lib/constants/buzzwords'
-import { BuzzwordService } from '@/lib/services/buzzword-service'
-import { createClient } from '@/utils/supabase/server'
+import { buzzwordDb } from '@/lib/db/buzzword-db'
+import { getSupabaseClient } from '@/lib/supabase/client'
 import type { BuzzwordData, BuzzwordRole, BuzzwordEntry } from '@/lib/types/buzzword'
 
 type BuzzwordSource = (typeof BUZZWORD_DATA)[keyof typeof BUZZWORD_DATA]
@@ -45,7 +45,7 @@ export async function generateBuzzwordAction(role: BuzzwordRole = 'ceo'): Promis
  */
 export async function submitBuzzwordAction(data: BuzzwordData): Promise<BuzzwordEntry> {
   // Check authentication - use getSession() for Server Actions (reads from cookies)
-  const supabase = await createClient()
+  const supabase = await getSupabaseClient()
   const {
     data: { session },
     error: authError,
@@ -56,6 +56,12 @@ export async function submitBuzzwordAction(data: BuzzwordData): Promise<Buzzword
     throw new Error('Authentication required. Please sign in to submit buzzwords.')
   }
 
-  // User is authenticated, proceed with submission
-  return await BuzzwordService.submitBuzzword(data)
+  // User is authenticated, proceed with submission (include user_id)
+  return await buzzwordDb.createBuzzword({
+    phrase: data.phrase,
+    meaning: data.fullSentence,
+    department: data.role,
+    synergy_score: data.score,
+    user_id: session.user.id,
+  })
 }
