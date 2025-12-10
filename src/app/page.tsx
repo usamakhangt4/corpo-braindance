@@ -59,6 +59,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-surface-base text-primary font-sans flex flex-col items-center p-4 md:p-8">
       {/* Header */}
+      {/* TODO: need to create a header component so we can use it across multiple pages */}
       <header className="w-full max-w-3xl text-center mb-10 mt-8">
         <h1 className="glitch-text cursor-default text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to from-yellow-300 via-pink-500 to-cyan-400 mb-2 uppercase tracking-tighter">
           CORPO // BRAINDANCE
@@ -67,6 +68,7 @@ export default function Home() {
         <p className="text-muted text-lg">Generate enterprise-grade nonsense for 2025.</p>
       </header>
       {/* Role Switcher Tabs - Neural Interface Mode Selector */}
+      {/* TODO: need to create a role switcher component also we might need to add other roles as well also we can update the ui as well so it stays respinsive on multiple view points */}
       <div className="relative flex items-center gap-2 mb-8 flex-col md:flex-row">
         <span className="text-xs font-mono text-neural-primary-hover uppercase tracking-wider border-r border-neural-primary/30 pr-4">
           [MODE]
@@ -132,6 +134,7 @@ export default function Home() {
 
       {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4 mt-8 w-full max-w-md">
+        {/* TODO: need to update the button component to use borders like we have in cyberpunk website */}
         <Button variant="gradient" size="xl" onClick={() => generate(role)} className="w-full md:w-1/2">
           <RefreshCcw className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
           Generate
@@ -141,6 +144,7 @@ export default function Home() {
           variant="slate"
           size="xl"
           onClick={() => {
+            // TODO: for copy to clipborad we need to create and position an icon button somewhere inside the neural card component
             copyToClipboard()
             if (user && user.email) {
               submitToHR()
