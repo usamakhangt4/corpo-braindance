@@ -4,7 +4,7 @@ import { BookmarkPlus, Copy, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { formatSavedBriefs } from '@/lib/buzzwords/lab'
-import { ROLE_LABELS } from '@/lib/constants/buzzwords'
+import { ROLE_LABELS, TECH_FIELD_LABELS } from '@/lib/constants/buzzwords'
 import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
 import type { DossierEntry } from '@/lib/types/buzzword'
 
@@ -86,7 +86,9 @@ export function SavedBriefs() {
             <article key={entry.id} className="archive-card" style={{ animationDelay: `${Math.min(index, 6) * 45}ms` }}>
               <div className="archive-card-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
               <div className="archive-card-body">
-                <p className="archive-card-meta">{ROLE_LABELS[entry.role]} / {entry.score}% JARGON</p>
+                <p className="archive-card-meta">
+                  {ROLE_LABELS[entry.role]} / {entry.field ? TECH_FIELD_LABELS[entry.field] ?? 'LEGACY STACK' : 'LEGACY STACK'} / {entry.score}% JARGON
+                </p>
                 <h3>{entry.phrase}</h3>
                 <p>{entry.fullSentence}</p>
               </div>

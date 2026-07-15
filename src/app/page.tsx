@@ -3,22 +3,23 @@
 import { useEffect } from 'react'
 import { BookmarkPlus, Copy, RefreshCcw } from 'lucide-react'
 import { toast } from 'sonner'
-import { BUZZWORD_ROLES, ROLE_LABELS } from '@/lib/constants/buzzwords'
+import { ROLE_LABELS, TECH_FIELD_LABELS } from '@/lib/constants/buzzwords'
 import { Button } from '@/components/ui/button'
 import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
 import { BriefGeneratorPanel } from '@/components/BriefGeneratorPanel'
+import { GenerationProfileControl } from '@/components/GenerationProfileControl'
 import { SavedBriefs } from '@/components/SavedBriefs'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { IndustrialBackdrop } from '@/components/IndustrialBackdrop'
 
 export default function Home() {
-  const { hydrated, currentBuzzword: data, role, animate, generate, fileCurrent } = useBuzzwordStore()
+  const { hydrated, currentBuzzword: data, role, field, animate, generate, fileCurrent } = useBuzzwordStore()
 
   useEffect(() => {
     if (hydrated && !data) {
-      generate(role)
+      generate(role, field)
     }
-  }, [data, generate, hydrated, role])
+  }, [data, field, generate, hydrated, role])
 
   const copyToClipboard = async () => {
     if (!data) return
@@ -89,29 +90,12 @@ export default function Home() {
               <span className="module-state">LOCAL PROCESS</span>
             </div>
 
-            <div className="mode-shell">
-              <div className="mode-heading">
-                <span id="mode-label">Select a department voice</span>
-                <span>{ROLE_LABELS[role]} ACTIVE</span>
-              </div>
-              <div role="group" aria-labelledby="mode-label" className="mode-grid">
-                {BUZZWORD_ROLES.map((candidateRole) => (
-                  <button
-                    key={candidateRole}
-                    type="button"
-                    aria-pressed={role === candidateRole}
-                    onClick={() => generate(candidateRole)}
-                    className="mode-button"
-                  >
-                    {ROLE_LABELS[candidateRole]}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <GenerationProfileControl voice={role} field={field} onApply={generate} />
 
             <BriefGeneratorPanel animate={animate}>
               <div className="output-meta">
                 <span>VOICE / {ROLE_LABELS[data.role]}</span>
+                <span>STACK / {TECH_FIELD_LABELS[data.field] ?? 'LEGACY'}</span>
                 <span>JARGON DENSITY <strong>{data.score}%</strong></span>
               </div>
 
@@ -130,7 +114,7 @@ export default function Home() {
             </BriefGeneratorPanel>
 
             <div className="generator-actions">
-              <Button variant="outline" size="lg" onClick={() => generate(role)} className="cyber-action cyber-action--primary">
+              <Button variant="outline" size="lg" onClick={() => generate()} className="cyber-action cyber-action--primary">
                 <RefreshCcw aria-hidden="true" className={`h-5 w-5 ${animate ? 'animate-spin' : ''}`} />
                 Generate jargon
               </Button>

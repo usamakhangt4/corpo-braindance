@@ -1,5 +1,12 @@
-import { BUZZWORD_DATA, ROLE_LABELS } from '../constants/buzzwords'
-import type { BuzzwordData, BuzzwordRole, DossierEntry } from '../types/buzzword'
+import {
+  BUZZWORD_DATA,
+  BUZZWORD_ROLES,
+  ROLE_LABELS,
+  TECH_FIELD_DATA,
+  TECH_FIELD_LABELS,
+  TECH_FIELDS,
+} from '../constants/buzzwords'
+import type { BuzzwordData, DossierEntry, GenerationField, GenerationVoice } from '../types/buzzword'
 
 type RandomSource = () => number
 
@@ -17,18 +24,26 @@ const createDossierId = (): string => {
   return `dossier-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-export function generateBuzzword(role: BuzzwordRole = 'ceo', random: RandomSource = Math.random): BuzzwordData {
-  const source = BUZZWORD_DATA[role]
-  const adverb = pick(source.adverbs, random)
-  const verb = pick(source.verbs, random)
-  const adjective = pick(source.adjectives, random)
-  const noun = pick(source.nouns, random)
-  const template = pick(source.templates, random)
+export function generateBuzzword(
+  selectedRole: GenerationVoice = 'random',
+  random: RandomSource = Math.random,
+  selectedField: GenerationField = 'all',
+): BuzzwordData {
+  const role = selectedRole === 'random' ? pick(BUZZWORD_ROLES, random) : selectedRole
+  const field = selectedField === 'all' ? pick(TECH_FIELDS, random).id : selectedField
+  const voice = BUZZWORD_DATA[role]
+  const stack = TECH_FIELD_DATA[field]
+  const adverb = pick(voice.adverbs, random)
+  const verb = pick(stack.verbs, random)
+  const adjective = pick(stack.adjectives, random)
+  const noun = pick(stack.nouns, random)
+  const template = pick(voice.templates, random)
 
   return {
     phrase: titleCase(`${adverb} ${verb} ${adjective} ${noun}`),
-    fullSentence: template(`${adverb} ${verb} the ${adjective} ${noun}`),
+    fullSentence: template(`${adverb} ${verb} ${adjective} ${noun}`),
     role,
+    field,
     score: Math.floor(random() * 20) + 80,
   }
 }
@@ -62,7 +77,7 @@ export function formatSavedBriefs(entries: DossierEntry[]): string {
   const records = entries
     .map((entry, index) =>
       [
-        `${String(index + 1).padStart(2, '0')} // ${ROLE_LABELS[entry.role]} // ${entry.score}%`,
+        `${String(index + 1).padStart(2, '0')} // ${ROLE_LABELS[entry.role]} // ${entry.score}%${entry.field ? ` // ${TECH_FIELD_LABELS[entry.field] ?? 'LEGACY STACK'}` : ''}`,
         entry.phrase,
         `“${entry.fullSentence}”`,
       ].join('\n'),

@@ -3,15 +3,16 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { fileBuzzword, generateBuzzword } from '@/lib/buzzwords/lab'
-import type { BuzzwordData, BuzzwordRole, DossierEntry } from '@/lib/types/buzzword'
+import type { BuzzwordData, DossierEntry, GenerationField, GenerationVoice } from '@/lib/types/buzzword'
 
 interface BuzzwordStore {
   hydrated: boolean
   currentBuzzword: BuzzwordData | null
-  role: BuzzwordRole
+  role: GenerationVoice
+  field: GenerationField
   dossier: DossierEntry[]
   animate: boolean
-  generate: (role?: BuzzwordRole) => void
+  generate: (role?: GenerationVoice, field?: GenerationField) => void
   fileCurrent: () => boolean
   removeFromDossier: (id: string) => void
   clearDossier: () => void
@@ -23,17 +24,20 @@ export const useBuzzwordStore = create<BuzzwordStore>()(
     (set, get) => ({
       hydrated: false,
       currentBuzzword: null,
-      role: 'ceo',
+      role: 'random',
+      field: 'all',
       dossier: [],
       animate: false,
 
-      generate: (selectedRole) => {
+      generate: (selectedRole, selectedField) => {
         const role = selectedRole ?? get().role
-        const buzzword = generateBuzzword(role)
+        const field = selectedField ?? get().field
+        const buzzword = generateBuzzword(role, Math.random, field)
 
         set({
           currentBuzzword: buzzword,
           role,
+          field,
           animate: true,
         })
 
@@ -72,6 +76,7 @@ export const useBuzzwordStore = create<BuzzwordStore>()(
       partialize: (state) => ({
         dossier: state.dossier,
         role: state.role,
+        field: state.field,
       }),
     },
   ),
