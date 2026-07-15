@@ -55,19 +55,19 @@ export function fileBuzzword(
   return { added: true, entries: [nextEntry, ...entries].slice(0, 20) }
 }
 
-export function formatDossier(entries: DossierEntry[]): string {
+export function formatSavedBriefs(entries: DossierEntry[]): string {
   if (entries.length === 0) return ''
 
-  const recordLabel = entries.length === 1 ? 'RECORD' : 'RECORDS'
+  const itemLabel = entries.length === 1 ? 'ITEM' : 'ITEMS'
   const records = entries
     .map((entry, index) =>
       [
         `${String(index + 1).padStart(2, '0')} // ${ROLE_LABELS[entry.role]} // ${entry.score}%`,
         entry.phrase,
-        `"${entry.fullSentence}"`,
+        `“${entry.fullSentence}”`,
       ].join('\n'),
     )
     .join('\n\n')
 
-  return `CORPO // BRAINDANCE\nNEURAL DOSSIER // ${entries.length} ${recordLabel}\n\n${records}`
+  return `CORPO // BRAINDANCE\nSAVED BRIEFS // ${entries.length} ${itemLabel}\n\n${records}`
 }

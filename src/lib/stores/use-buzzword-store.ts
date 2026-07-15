@@ -9,13 +9,13 @@ interface BuzzwordStore {
   hydrated: boolean
   currentBuzzword: BuzzwordData | null
   role: BuzzwordRole
-  history: BuzzwordData[]
   dossier: DossierEntry[]
   animate: boolean
   generate: (role?: BuzzwordRole) => void
   fileCurrent: () => boolean
   removeFromDossier: (id: string) => void
   clearDossier: () => void
+  restoreDossier: (entries: DossierEntry[]) => void
 }
 
 export const useBuzzwordStore = create<BuzzwordStore>()(
@@ -24,7 +24,6 @@ export const useBuzzwordStore = create<BuzzwordStore>()(
       hydrated: false,
       currentBuzzword: null,
       role: 'ceo',
-      history: [],
       dossier: [],
       animate: false,
 
@@ -32,12 +31,11 @@ export const useBuzzwordStore = create<BuzzwordStore>()(
         const role = selectedRole ?? get().role
         const buzzword = generateBuzzword(role)
 
-        set((state) => ({
+        set({
           currentBuzzword: buzzword,
           role,
           animate: true,
-          history: [buzzword, ...state.history].slice(0, 10),
-        }))
+        })
 
         window.setTimeout(() => set({ animate: false }), 360)
       },
@@ -59,13 +57,19 @@ export const useBuzzwordStore = create<BuzzwordStore>()(
         })),
 
       clearDossier: () => set({ dossier: [] }),
+
+      restoreDossier: (entries) =>
+        set((state) => ({
+          dossier: [...entries, ...state.dossier]
+            .filter((entry, index, allEntries) => allEntries.findIndex((candidate) => candidate.id === entry.id) === index)
+            .slice(0, 20),
+        })),
     }),
     {
       name: 'corpo-braindance-dossier',
       storage: createJSONStorage(() => localStorage),
       skipHydration: true,
       partialize: (state) => ({
-        history: state.history,
         dossier: state.dossier,
         role: state.role,
       }),

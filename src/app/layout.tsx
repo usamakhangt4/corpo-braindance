@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'CORPO // BRAINDANCE',
-  description: 'Generate enterprise-grade corporate nonsense and file the best artifacts locally.',
+  description: 'Generate satirical corporate jargon and save your favorite briefs locally.',
 }
 
 export default function RootLayout({

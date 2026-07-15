@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fileBuzzword, formatDossier, generateBuzzword } from '../src/lib/buzzwords/lab'
+import { fileBuzzword, formatSavedBriefs, generateBuzzword } from '../src/lib/buzzwords/lab'
 
 describe('buzzword lab', () => {
   it('generates a complete phrase locally from a selected role', () => {
@@ -14,7 +14,7 @@ describe('buzzword lab', () => {
     })
   })
 
-  it('files unique phrases to the local dossier', () => {
+  it('saves each unique phrase once', () => {
     const buzzword = generateBuzzword('tech', () => 0)
     const first = fileBuzzword([], buzzword)
     const duplicate = fileBuzzword(first.entries, buzzword)
@@ -25,14 +25,14 @@ describe('buzzword lab', () => {
     expect(duplicate).toEqual({ added: false, entries: first.entries })
   })
 
-  it('formats filed phrases as a portable dossier', () => {
+  it('formats saved phrases for clipboard export', () => {
     const filed = fileBuzzword([], generateBuzzword('tech', () => 0)).entries
-    const output = formatDossier(filed)
+    const output = formatSavedBriefs(filed)
 
     expect(output).toContain('CORPO // BRAINDANCE')
-    expect(output).toContain('NEURAL DOSSIER // 1 RECORD')
+    expect(output).toContain('SAVED BRIEFS // 1 ITEM')
     expect(output).toContain('01 // ENGINEERING // 80%')
     expect(output).toContain(filed[0].phrase)
-    expect(output).toContain(`"${filed[0].fullSentence}"`)
+    expect(output).toContain(`“${filed[0].fullSentence}”`)
   })
 })

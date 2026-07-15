@@ -2,9 +2,9 @@
 
 ## Product contract
 
-CORPO // BRAINDANCE is a local-first portfolio experience. Its single job is to generate satirical corporate language and let a visitor curate a personal collection without registration or network dependencies.
+CORPO // BRAINDANCE is a local-first portfolio experience. Its single job is to generate satirical corporate language and let a visitor save favorites without registration or network dependencies.
 
-The product intentionally has one route: `/`. Generation, recent transmissions, and the Neural Dossier form one continuous workflow.
+The product intentionally has one route: `/`. The generator is the primary experience; Saved Briefs is a secondary collection below it.
 
 ## Data flow
 
@@ -15,32 +15,28 @@ Buzzword Lab → Generator UI
    ↓              ↓
 Zustand store → localStorage
    ↓
-Neural Dossier
+Saved Briefs
 ```
 
 ### Buzzword Lab
 
-`src/lib/buzzwords/lab.ts` is the behavior module. Its interface contains three operations:
+`src/lib/buzzwords/lab.ts` exposes three operations:
 
 - `generateBuzzword(role)`
 - `fileBuzzword(entries, buzzword)`
-- `formatDossier(entries)`
+- `formatSavedBriefs(entries)`
 
-The implementation hides random selection, duplicate prevention, the twenty-record limit, and portable text formatting. Generation accepts an optional random source so tests remain deterministic without a remote adapter.
+The implementation hides random selection, duplicate prevention, the 20-item limit, and portable text formatting. Generation accepts an optional random source so tests remain deterministic without a remote adapter.
 
 ### Browser state
 
-`src/lib/stores/use-buzzword-store.ts` manages current UI state and persists:
+`src/lib/stores/use-buzzword-store.ts` persists up to 20 saved briefs and the selected generation role. The legacy-compatible storage key remains `corpo-braindance-dossier` so existing saved data continues to load.
 
-- the last ten generated phrases;
-- up to twenty filed dossier entries;
-- the selected generation role.
+Hydration starts after mount through `LocalStateHydrator`, keeping server-rendered and first-client-rendered markup consistent.
 
-Persistence uses the `corpo-braindance-dossier` key. Hydration starts after mount through `LocalStateHydrator`, keeping server-rendered and first-client-rendered markup consistent.
+### Saved brief interaction
 
-### Dossier interaction
-
-Every filed record remains visible in a bounded, scrollable collection. Visitors can copy or remove one record, copy the full dossier as plain text, or clear the collection. These actions are deliberately personal and local; the interface makes no claim of shared votes, rankings, or other users.
+The empty collection is a compact prompt below the generator rather than a permanent sidebar. Once populated, briefs appear in a responsive card grid. Visitors can copy or remove one brief, copy all briefs as plain text, or clear the collection. Remove and clear actions offer Undo.
 
 ## Static deployment
 
@@ -51,7 +47,9 @@ Any host that serves static files can deploy the project. Vercel and Netlify can
 ## Accessibility and resilience
 
 - The single page has a skip link and semantic regions.
-- Mode controls expose pressed state; record actions use descriptive labels.
+- Mode controls expose pressed state; icon actions have descriptive labels.
+- Keyboard focus remains visible.
+- Destructive actions are reversible through Undo.
 - Status messages use live regions through toast primitives.
 - Reduced-motion preferences disable decorative animation.
 - Core interactions make no runtime network calls after the static application loads.
@@ -65,7 +63,7 @@ npx tsc --noEmit
 npm run build
 ```
 
-The local behavior tests cover deterministic generation, duplicate filing, and dossier formatting. The browser smoke test covers filing, persistence, per-record copy and removal, full-dossier copy, responsive rendering, and runtime errors.
+The behavior tests cover deterministic generation, duplicate saving, and saved-brief formatting. The browser smoke test covers saving, persistence, clipboard actions, removal, clearing, undo, responsive rendering, and runtime errors.
 
 ## Archived backend version
 
