@@ -1,14 +1,27 @@
 'use client'
 
-import Link from 'next/link'
-import { Archive, Clock3, HardDrive, Trash2, Trophy } from 'lucide-react'
+import { Archive, Clock3, Copy, HardDrive, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { formatDossier } from '@/lib/buzzwords/lab'
 import { ROLE_LABELS } from '@/lib/constants/buzzwords'
-import { ROUTES } from '@/lib/constants/routes'
 import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
+import type { DossierEntry } from '@/lib/types/buzzword'
+
+const formatRecord = (entry: DossierEntry): string => `${entry.phrase}\n"${entry.fullSentence}"`
 
 export function DossierPanel() {
   const { dossier, history, removeFromDossier, clearDossier } = useBuzzwordStore()
+
+  const copyRecord = async (entry: DossierEntry) => {
+    await navigator.clipboard.writeText(formatRecord(entry))
+    toast.success('Record copied to clipboard.')
+  }
+
+  const copyDossier = async () => {
+    await navigator.clipboard.writeText(formatDossier(dossier))
+    toast.success('Dossier copied to clipboard.')
+  }
 
   return (
     <aside className="relative overflow-hidden rounded-2xl border border-neural-primary/30 bg-surface-elevated/75 p-5 shadow-neural backdrop-blur-sm">
@@ -35,24 +48,35 @@ export function DossierPanel() {
             <p className="mt-1 text-xs leading-relaxed text-muted">Generate a phrase, then file the ones worth preserving as evidence.</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {dossier.slice(0, 5).map((entry) => (
-              <article key={entry.id} className="group rounded-xl border border-elevated bg-surface-base/55 p-3">
+          <div className="max-h-96 space-y-2 overflow-y-auto pr-1" aria-label="Filed dossier records">
+            {dossier.map((entry, index) => (
+              <article key={entry.id} className="rounded-xl border border-elevated bg-surface-base/55 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-neural-primary-dark">
-                      {ROLE_LABELS[entry.role]} · {entry.score}%
+                      {`${String(index + 1).padStart(2, '0')} // ${ROLE_LABELS[entry.role]} // ${entry.score}%`}
                     </p>
-                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-secondary">{entry.phrase}</p>
+                    <h3 className="text-sm font-semibold leading-snug text-secondary">{entry.phrase}</h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-muted">{entry.fullSentence}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFromDossier(entry.id)}
-                    className="shrink-0 rounded-md p-1.5 text-muted transition-colors hover:bg-status-error/20 hover:text-status-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neural-primary"
-                    aria-label={`Remove ${entry.phrase} from dossier`}
-                  >
-                    <Trash2 aria-hidden="true" className="h-4 w-4" />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => void copyRecord(entry)}
+                      className="rounded-md p-1.5 text-muted transition-colors hover:bg-neural-primary/15 hover:text-neural-primary-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neural-primary"
+                      aria-label={`Copy ${entry.phrase}`}
+                    >
+                      <Copy aria-hidden="true" className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeFromDossier(entry.id)}
+                      className="rounded-md p-1.5 text-muted transition-colors hover:bg-status-error/20 hover:text-status-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neural-primary"
+                      aria-label={`Remove ${entry.phrase} from dossier`}
+                    >
+                      <Trash2 aria-hidden="true" className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}
@@ -60,8 +84,19 @@ export function DossierPanel() {
         )}
       </div>
 
+      <div className="relative grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+        <Button variant="outline" size="sm" onClick={() => void copyDossier()} disabled={dossier.length === 0}>
+          <Copy aria-hidden="true" className="h-4 w-4" />
+          Copy dossier
+        </Button>
+        <Button variant="ghost" size="sm" onClick={clearDossier} disabled={dossier.length === 0}>
+          <Trash2 aria-hidden="true" className="h-4 w-4" />
+          Clear dossier
+        </Button>
+      </div>
+
       {history.length > 0 && (
-        <div className="relative border-t border-elevated pt-4">
+        <div className="relative mt-5 border-t border-elevated pt-4">
           <div className="mb-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted">
             <Clock3 aria-hidden="true" className="h-3.5 w-3.5" />
             Recent transmissions
@@ -69,26 +104,13 @@ export function DossierPanel() {
           <div className="space-y-2">
             {history.slice(0, 3).map((entry, index) => (
               <p key={`${entry.phrase}-${index}`} className="truncate text-xs text-secondary">
-                <span className="mr-2 text-neural-primary-dark">0{index + 1}</span>
+                <span className="mr-2 text-neural-primary-dark">{String(index + 1).padStart(2, '0')}</span>
                 {entry.phrase}
               </p>
             ))}
           </div>
         </div>
       )}
-
-      <div className="relative mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-        <Button variant="outline" size="sm" asChild>
-          <Link href={ROUTES.HALL_OF_SHAME}>
-            <Trophy aria-hidden="true" className="h-4 w-4" />
-            Open ranking
-          </Link>
-        </Button>
-        <Button variant="ghost" size="sm" onClick={clearDossier} disabled={dossier.length === 0}>
-          <Trash2 aria-hidden="true" className="h-4 w-4" />
-          Clear dossier
-        </Button>
-      </div>
     </aside>
   )
 }

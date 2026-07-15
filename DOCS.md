@@ -4,33 +4,29 @@
 
 CORPO // BRAINDANCE is a local-first portfolio experience. Its single job is to generate satirical corporate language and let a visitor curate a personal collection without registration or network dependencies.
 
-There are two routes:
-
-- `/` — generator, actions, recent transmissions, and Neural Dossier
-- `/hall-of-shame` — curated artifacts plus locally filed records and browser-local voting
+The product intentionally has one route: `/`. Generation, recent transmissions, and the Neural Dossier form one continuous workflow.
 
 ## Data flow
 
 ```text
 Word banks
    ↓
-Buzzword Lab ──→ Generator UI
-   ↓                  ↓
-Ranking logic ← Zustand store → localStorage
+Buzzword Lab → Generator UI
+   ↓              ↓
+Zustand store → localStorage
    ↓
-Hall of Shame UI
+Neural Dossier
 ```
 
 ### Buzzword Lab
 
-`src/lib/buzzwords/lab.ts` is the behavior module. Its interface contains four operations:
+`src/lib/buzzwords/lab.ts` is the behavior module. Its interface contains three operations:
 
 - `generateBuzzword(role)`
 - `fileBuzzword(entries, buzzword)`
-- `toggleLocalVote(votes, entryId, action)`
-- `rankHallEntries(dossier, votes)`
+- `formatDossier(entries)`
 
-The implementation hides random selection, duplicate prevention, dossier limits, curated-entry merging, score adjustment, and ranking tie-breakers. Generation accepts an optional random source so tests can be deterministic without introducing a remote adapter.
+The implementation hides random selection, duplicate prevention, the twenty-record limit, and portable text formatting. Generation accepts an optional random source so tests remain deterministic without a remote adapter.
 
 ### Browser state
 
@@ -38,16 +34,13 @@ The implementation hides random selection, duplicate prevention, dossier limits,
 
 - the last ten generated phrases;
 - up to twenty filed dossier entries;
-- local votes;
 - the selected generation role.
 
 Persistence uses the `corpo-braindance-dossier` key. Hydration starts after mount through `LocalStateHydrator`, keeping server-rendered and first-client-rendered markup consistent.
 
-### Hall ranking
+### Dossier interaction
 
-The Hall starts with curated sample artifacts. Filed phrases are added with zero base points. A local Promote vote adds one point, a Fire vote subtracts one, and repeating the same vote clears it. Entries sort by points, then synergy score, then stable ID.
-
-The interface explicitly labels this as a local simulation; no shared leaderboard is implied.
+Every filed record remains visible in a bounded, scrollable collection. Visitors can copy or remove one record, copy the full dossier as plain text, or clear the collection. These actions are deliberately personal and local; the interface makes no claim of shared votes, rankings, or other users.
 
 ## Static deployment
 
@@ -57,11 +50,11 @@ Any host that serves static files can deploy the project. Vercel and Netlify can
 
 ## Accessibility and resilience
 
-- Navigation is keyboard operable and the mobile dialog traps and restores focus.
-- Controls expose pressed state and descriptive labels.
-- Status messages use live regions through the toast and loading primitives.
+- The single page has a skip link and semantic regions.
+- Mode controls expose pressed state; record actions use descriptive labels.
+- Status messages use live regions through toast primitives.
 - Reduced-motion preferences disable decorative animation.
-- Core interactions make no runtime network calls after the static application has loaded.
+- Core interactions make no runtime network calls after the static application loads.
 
 ## Verification
 
@@ -72,7 +65,7 @@ npx tsc --noEmit
 npm run build
 ```
 
-The local behavior tests cover deterministic generation, duplicate filing, vote toggling, and ranking. The browser smoke test covers the generator, dossier persistence, Hall voting, mobile navigation focus, and reduced-motion rendering.
+The local behavior tests cover deterministic generation, duplicate filing, and dossier formatting. The browser smoke test covers filing, persistence, per-record copy and removal, full-dossier copy, responsive rendering, and runtime errors.
 
 ## Archived backend version
 

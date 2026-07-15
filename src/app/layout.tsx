@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Orbitron, JetBrains_Mono } from 'next/font/google'
-import { Suspense } from 'react'
 import './globals.css'
-import Navbar from '../components/Navbar'
 import SplashScreen from '../components/splash-screen'
 import { Toaster } from '@/components/ui/sonner'
 import { LocalStateHydrator } from '@/components/LocalStateHydrator'
@@ -40,10 +38,7 @@ export default function RootLayout({
         </a>
         <LocalStateHydrator />
         <SplashScreen />
-        <Suspense fallback={<div className="h-16" />}>
-          <Navbar />
-        </Suspense>
-        <div id="main-content" tabIndex={-1} className="pt-16">
+        <div id="main-content" tabIndex={-1}>
           {children}
         </div>
         <Toaster position="top-center" richColors />

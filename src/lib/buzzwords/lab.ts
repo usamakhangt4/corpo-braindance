@@ -1,14 +1,5 @@
-import { BUZZWORD_DATA } from '../constants/buzzwords'
-import { CURATED_HALL_ENTRIES } from '../constants/hall-of-shame'
-import type {
-  BuzzwordData,
-  BuzzwordRole,
-  DossierEntry,
-  HallEntry,
-  LocalVotes,
-  RankedHallEntry,
-  VoteAction,
-} from '../types/buzzword'
+import { BUZZWORD_DATA, ROLE_LABELS } from '../constants/buzzwords'
+import type { BuzzwordData, BuzzwordRole, DossierEntry } from '../types/buzzword'
 
 type RandomSource = () => number
 
@@ -64,38 +55,19 @@ export function fileBuzzword(
   return { added: true, entries: [nextEntry, ...entries].slice(0, 20) }
 }
 
-export function toggleLocalVote(votes: LocalVotes, entryId: string, action: VoteAction): LocalVotes {
-  if (votes[entryId] === action) {
-    const nextVotes = { ...votes }
-    delete nextVotes[entryId]
-    return nextVotes
-  }
+export function formatDossier(entries: DossierEntry[]): string {
+  if (entries.length === 0) return ''
 
-  return { ...votes, [entryId]: action }
-}
+  const recordLabel = entries.length === 1 ? 'RECORD' : 'RECORDS'
+  const records = entries
+    .map((entry, index) =>
+      [
+        `${String(index + 1).padStart(2, '0')} // ${ROLE_LABELS[entry.role]} // ${entry.score}%`,
+        entry.phrase,
+        `"${entry.fullSentence}"`,
+      ].join('\n'),
+    )
+    .join('\n\n')
 
-export function rankHallEntries(dossier: DossierEntry[], localVotes: LocalVotes): RankedHallEntry[] {
-  const dossierEntries: HallEntry[] = dossier.map((entry) => ({
-    id: entry.id,
-    phrase: entry.phrase,
-    meaning: entry.fullSentence,
-    role: entry.role,
-    score: entry.score,
-    baseVotes: 0,
-    source: 'dossier',
-    filedAt: entry.filedAt,
-  }))
-
-  return [...CURATED_HALL_ENTRIES, ...dossierEntries]
-    .map((entry) => {
-      const userVote = localVotes[entry.id] ?? null
-      const localDelta = userVote === 'promote' ? 1 : userVote === 'fire' ? -1 : 0
-
-      return {
-        ...entry,
-        votes: entry.baseVotes + localDelta,
-        userVote,
-      }
-    })
-    .sort((left, right) => right.votes - left.votes || right.score - left.score || left.id.localeCompare(right.id))
+  return `CORPO // BRAINDANCE\nNEURAL DOSSIER // ${entries.length} ${recordLabel}\n\n${records}`
 }
