@@ -180,8 +180,3 @@ export const ROLE_LABELS: Record<string, string> = {
   sales: 'GROWTH',
   tech: 'ENGINEERING',
 } as const
-
-// Page-specific limits
-export const HALL_OF_SHAME_LIMIT = 10
-export const BROWSE_PAGE_LIMIT = 50
-export const DEFAULT_LIMIT = 10

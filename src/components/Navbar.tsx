@@ -1,12 +1,10 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Trophy, LogIn, LucideIcon, LogOut, User, Settings, Menu } from 'lucide-react'
+import { Home, Menu, Trophy, type LucideIcon } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
-import { useAuthStore } from '@/lib/stores/use-auth-store'
-import UserDropdown from './UserDropdown'
 import RadialMenu from './RadialMenu'
 import { cn } from '@/lib/utils'
 import { BrandLogo } from './BrandLogo'
@@ -15,184 +13,60 @@ interface NavItem {
   href: string
   label: string
   icon: LucideIcon
-  action?: 'logout' | 'profile-menu'
 }
+
+const NAV_ITEMS: NavItem[] = [
+  { href: ROUTES.HOME, label: 'Generator', icon: Home },
+  { href: ROUTES.HALL_OF_SHAME, label: 'Hall of Shame', icon: Trophy },
+]
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuthStore()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
 
-  // Base navigation items
-  const baseItems = useMemo<NavItem[]>(() => [{ href: ROUTES.HALL_OF_SHAME, label: 'Hall of Shame', icon: Trophy }], [])
+  const handleMenuToggle = useCallback(() => setMenuOpen((open) => !open), [])
+  const handleMenuClose = useCallback(() => setMenuOpen(false), [])
 
-  // Profile menu items (shown when profile icon is clicked)
-  const profileMenuItems = useMemo<NavItem[]>(
-    () => [
-      { href: ROUTES.PROFILE_PAGE, label: 'Profile', icon: User },
-      { href: ROUTES.SETTINGS_PAGE, label: 'Settings', icon: Settings },
-      { href: '#', label: 'Logout', icon: LogOut, action: 'logout' },
-    ],
-    [],
-  )
-
-  // Desktop navigation items
-  const desktopNavItems = useMemo<NavItem[]>(() => {
-    if (user) {
-      return baseItems
-    } else {
-      return [...baseItems, { href: ROUTES.LOGIN_PAGE, label: 'Login', icon: LogIn }]
-    }
-  }, [user, baseItems])
-
-  // All possible main navigation items
-  const allMainNavItems = useMemo<NavItem[]>(() => {
-    if (user) {
-      return [
-        { href: ROUTES.HOME, label: 'Home', icon: Home },
-        ...baseItems,
-        { href: '#', label: 'Profile', icon: User, action: 'profile-menu' },
-      ]
-    } else {
-      return [
-        { href: ROUTES.HOME, label: 'Home', icon: Home },
-        ...baseItems,
-        { href: ROUTES.LOGIN_PAGE, label: 'Login', icon: LogIn },
-      ]
-    }
-  }, [user, baseItems])
-
-  // Center item - Only Home (when not in profile menu) or null (back button handled separately)
-  const centerItem = useMemo<NavItem | null>(() => {
-    // When in profile menu, back button is shown (handled in RadialMenu)
-    if (showProfileMenu) return null
-
-    // Always show Home in center
-    const homeItem = allMainNavItems.find((item) => item.href === ROUTES.HOME)
-    return homeItem || null
-  }, [allMainNavItems, showProfileMenu])
-
-  // Main navigation items (filtered - exclude Home since it's in center, and active item)
-  const mainNavItems = useMemo<NavItem[]>(() => {
-    if (user) {
-      const filtered = allMainNavItems.filter((item) => {
-        // Don't include Home (it's in center)
-        if (item.href === ROUTES.HOME) {
-          return false
-        }
-        // Don't include active item
-        if (item.href === ROUTES.PROFILE_PAGE) {
-          return true // Keep profile menu trigger
-        }
-        return pathname !== item.href
-      })
-      return filtered
-    } else {
-      const isOnLoginPage = pathname === ROUTES.LOGIN_PAGE
-
-      return allMainNavItems.filter((item) => {
-        // Don't include Home (it's in center)
-        if (item.href === ROUTES.HOME) {
-          return false
-        }
-        // Don't include active item
-        if (item.href === ROUTES.LOGIN_PAGE) {
-          return !isOnLoginPage
-        }
-
-        return pathname !== item.href
-      })
-    }
-  }, [user, allMainNavItems, pathname])
-
-  // Determine which items to show
-  const currentItems = showProfileMenu ? profileMenuItems : mainNavItems
-
-  const handleMenuToggle = useCallback(() => {
-    setMenuOpen((prev) => {
-      const newState = !prev
-      if (!newState) {
-        setShowProfileMenu(false)
-      }
-      return newState
-    })
-  }, [])
-
-  const handleMenuClose = useCallback(() => {
-    setMenuOpen(false)
-    setShowProfileMenu(false)
-  }, [])
-
-  const handleItemClick = useCallback(
-    async (item: NavItem) => {
-      if (item.action === 'profile-menu') {
-        setShowProfileMenu(true)
-      } else if (item.action === 'logout') {
-        await signOut()
-        handleMenuClose()
-      } else {
-        handleMenuClose()
-      }
-    },
-    [signOut, handleMenuClose],
-  )
-
-  const handleBack = useCallback(() => {
-    setShowProfileMenu(false)
-  }, [])
+  const mobileItems = useMemo(() => NAV_ITEMS.filter((item) => item.href !== ROUTES.HOME && item.href !== pathname), [pathname])
+  const homeItem = NAV_ITEMS[0]
 
   return (
     <>
-      <nav aria-label="Primary navigation" className="fixed top-0 left-0 right-0 z-50 bg-surface-base/95 backdrop-blur-md border-b border-elevated/50 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 md:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo/Brand */}
-            <BrandLogo href="/" size="sm" />
+      <nav aria-label="Primary navigation" className="fixed inset-x-0 top-0 z-50 border-b border-elevated/50 bg-surface-base/95 shadow-lg backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 md:px-8">
+          <div className="flex h-16 items-center justify-between">
+            <BrandLogo href={ROUTES.HOME} size="sm" />
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden md:flex items-center gap-2">
-              {desktopNavItems.map((item) => {
+            <div className="hidden items-center gap-2 md:flex">
+              {NAV_ITEMS.slice(1).map((item) => {
                 const Icon = item.icon
-                const isActive = pathname.includes(item.href)
+                const isActive = pathname === item.href
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? 'page' : undefined}
                     className={cn(
-                      'relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-[color,background-color,border-color,box-shadow] duration-200',
+                      'relative flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-[color,background-color,border-color,box-shadow] duration-200',
                       isActive
-                        ? 'text-neural-primary-hover bg-neural-primary/10 border border-neural-primary/30 shadow-lg'
-                        : 'text-secondary hover:text-neural-primary-hover hover:bg-surface-overlay/50 border border-transparent hover:border-neural-primary/20',
+                        ? 'border-neural-primary/30 bg-neural-primary/10 text-neural-primary-hover shadow-lg'
+                        : 'border-transparent text-secondary hover:border-neural-primary/20 hover:bg-surface-overlay/50 hover:text-neural-primary-hover',
                     )}
                   >
-                    {isActive && <div className="absolute inset-0 bg-neural-primary/5 rounded-lg animate-pulse"></div>}
-                    <Icon className={cn('w-4 h-4', isActive ? 'text-neural-primary-hover' : 'text-muted')} />
-                    <span className="relative uppercase tracking-wider text-xs">{item.label}</span>
+                    <Icon aria-hidden="true" className={cn('h-4 w-4', isActive ? 'text-neural-primary-hover' : 'text-muted')} />
+                    <span className="relative text-xs uppercase tracking-wider">{item.label}</span>
                   </Link>
                 )
               })}
-
-              {/* User Menu - Show when authenticated */}
-              {user && <UserDropdown />}
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={handleMenuToggle}
               className={cn(
-                'md:hidden w-10 h-10 rounded-lg',
-                'bg-surface-elevated/95 backdrop-blur-md border-2',
-                'border-neural-primary/50 shadow-lg shadow-neural',
-                'flex items-center justify-center',
-                'transition-[background-color,border-color,box-shadow,transform] duration-200',
-                'hover:bg-surface-overlay/95 hover:border-neural-primary-hover/70',
-                'hover:shadow-neural-accent hover:scale-105',
-                'active:scale-95',
-                'focus-visible:outline-none focus-visible:ring-2',
-                'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
-                'focus-visible:ring-offset-surface-base',
+                'relative flex h-10 w-10 items-center justify-center rounded-lg border-2 border-neural-primary/50 bg-surface-elevated/95 shadow-lg shadow-neural transition-[background-color,border-color,box-shadow,transform] duration-200 md:hidden',
+                'hover:scale-105 hover:border-neural-primary-hover/70 hover:bg-surface-overlay/95 hover:shadow-neural-accent active:scale-95',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-base',
                 menuOpen && 'border-neural-primary-hover shadow-xl shadow-neural-accent',
               )}
               aria-label="Toggle menu"
@@ -200,28 +74,21 @@ export default function Navbar() {
               aria-controls="mobile-navigation-menu"
               type="button"
             >
-              <div className="absolute inset-0 bg-neural-primary/10 rounded-lg blur-lg" />
-              <Menu className="relative z-10 w-5 h-5 text-neural-primary-hover" />
+              <div className="absolute inset-0 rounded-lg bg-neural-primary/10 blur-lg" />
+              <Menu aria-hidden="true" className="relative z-10 h-5 w-5 text-neural-primary-hover" />
             </button>
           </div>
         </div>
-
-        {/* Bottom Glow Effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+        <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-cyan-500/50 to-transparent" />
       </nav>
 
-      {/* Radial Menu - Mobile only */}
-      {currentItems.length > 0 && (
-        <RadialMenu
-          items={currentItems}
-          centerItem={centerItem}
-          isOpen={menuOpen}
-          onClose={handleMenuClose}
-          onItemClick={handleItemClick}
-          showBackButton={showProfileMenu}
-          onBack={handleBack}
-        />
-      )}
+      <RadialMenu
+        items={mobileItems}
+        centerItem={homeItem}
+        isOpen={menuOpen}
+        onClose={handleMenuClose}
+        onItemClick={handleMenuClose}
+      />
     </>
   )
 }

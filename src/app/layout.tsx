@@ -4,8 +4,8 @@ import { Suspense } from 'react'
 import './globals.css'
 import Navbar from '../components/Navbar'
 import SplashScreen from '../components/splash-screen'
-import { QueryProvider } from '@/lib/providers/query-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { LocalStateHydrator } from '@/components/LocalStateHydrator'
 
 const orbitron = Orbitron({
   variable: '--font-geist-sans',
@@ -21,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'CORPO // BRAINDANCE',
-  description: 'CORPO // BRAINDANCE',
+  description: 'Generate enterprise-grade corporate nonsense and file the best artifacts locally.',
 }
 
 export default function RootLayout({
@@ -38,16 +38,15 @@ export default function RootLayout({
         >
           Skip to Main Content
         </a>
-        <QueryProvider>
-          <SplashScreen />
-          <Suspense fallback={<div className="h-16" />}>
-            <Navbar />
-          </Suspense>
-          <div id="main-content" tabIndex={-1} className="pt-16">
-            {children}
-          </div>
-          <Toaster position="top-center" richColors />
-        </QueryProvider>
+        <LocalStateHydrator />
+        <SplashScreen />
+        <Suspense fallback={<div className="h-16" />}>
+          <Navbar />
+        </Suspense>
+        <div id="main-content" tabIndex={-1} className="pt-16">
+          {children}
+        </div>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   )
