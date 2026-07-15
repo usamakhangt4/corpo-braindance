@@ -1,26 +1,14 @@
-/**
- * Type definitions for buzzword-related data structures
- */
-
-export interface BuzzwordEntry {
-  id: number
-  phrase: string
-  meaning: string
-  department: string
-  synergy_score: number
-  upvotes: number
-  user_id: string | null
-  created_at: string
-  user_vote?: 'upvote' | 'downvote' | null // Current user's vote on this buzzword
-}
+export type BuzzwordRole = 'ceo' | 'sales' | 'tech'
 
 export interface BuzzwordData {
   phrase: string
   fullSentence: string
-  role: string
+  role: BuzzwordRole
   score: number
 }
 
-export type BuzzwordRole = 'ceo' | 'sales' | 'tech'
-
-export type VoteAction = 'promote' | 'fire'
+export interface DossierEntry extends BuzzwordData {
+  id: string
+  filedAt: string
+  source: 'dossier'
+}

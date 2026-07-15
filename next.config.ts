@@ -1,20 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '*.googleusercontent.com',
-        pathname: '/**',
-      },
-    ],
-  },
-};
+  output: 'export',
+  trailingSlash: true,
+}
 
-export default nextConfig;
+export default nextConfig

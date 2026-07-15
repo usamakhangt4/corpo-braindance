@@ -1,158 +1,157 @@
 'use client'
 
 import { useEffect } from 'react'
-import { FilePenLine, RefreshCcw } from 'lucide-react'
+import { BookmarkPlus, Copy, RefreshCcw } from 'lucide-react'
+import { toast } from 'sonner'
 import { BUZZWORD_ROLES, ROLE_LABELS } from '@/lib/constants/buzzwords'
 import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/lib/stores/use-auth-store'
 import { useBuzzwordStore } from '@/lib/stores/use-buzzword-store'
-import { useSubmitBuzzword } from '@/hooks/use-buzzwords'
-import { NeuralCard } from '@/components/NeuralCard'
-import { toast } from 'sonner'
+import { BriefGeneratorPanel } from '@/components/BriefGeneratorPanel'
+import { SavedBriefs } from '@/components/SavedBriefs'
+import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { IndustrialBackdrop } from '@/components/IndustrialBackdrop'
 
 export default function Home() {
-  // Use Zustand stores for UI state
-  const { currentBuzzword: data, role, animate, setRole, generate } = useBuzzwordStore()
-  const { user } = useAuthStore()
+  const { hydrated, currentBuzzword: data, role, animate, generate, fileCurrent } = useBuzzwordStore()
 
-  // React Query for mutations
-  const submitBuzzword = useSubmitBuzzword()
-
-  // Initialize auth and generate first buzzword
   useEffect(() => {
-    useAuthStore.getState().initialize()
-    generate(role)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (hydrated && !data) {
+      generate(role)
+    }
+  }, [data, generate, hydrated, role])
 
-  const copyToClipboard = () => {
+  const copyToClipboard = async () => {
     if (!data) return
-    navigator.clipboard.writeText(`${data.phrase}\n"${data.fullSentence}"`)
-    toast.success('Synergy successfully leveraged to clipboard!')
+    await navigator.clipboard.writeText(`${data.phrase}\n“${data.fullSentence}”`)
+    toast.success('Memo copied to clipboard.')
   }
 
-  const submitToHR = async () => {
+  const saveBrief = () => {
     if (!data) return
-
-    // Check authentication client-side first
-    if (!user) {
-      toast.warning('Please sign in to submit buzzwords to HR.')
-      return
-    }
-
-    try {
-      await toast.promise(submitBuzzword.mutateAsync(data), {
-        loading: 'Submitting to HR…',
-        success: 'Filed to Permanent Record.',
-        error: (error) => {
-          const errorMessage = error instanceof Error ? error.message : 'HR rejected your submission.'
-          return errorMessage
-        },
-      })
-    } catch (error) {
-      // Error is already handled by toast.promise
-      console.error(error)
-    }
+    const added = fileCurrent()
+    toast[added ? 'success' : 'info'](added ? 'Brief saved in this browser.' : 'This brief is already saved.')
   }
 
-  if (!data) return null
+  if (!hydrated || !data) {
+    return (
+      <main className="poster-page flex min-h-svh items-center justify-center p-6">
+        <IndustrialBackdrop />
+        <LoadingSpinner message="Loading the corporate lexicon…" className="relative z-10" />
+      </main>
+    )
+  }
 
   return (
-    <main className="min-h-screen bg-surface-base text-primary font-sans flex flex-col items-center p-4 md:p-8">
-      {/* Header */}
-      <header className="w-full max-w-3xl text-center mb-10 mt-8">
-        <h1 className="glitch-text cursor-default text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to from-yellow-300 via-pink-500 to-cyan-400 mb-2 uppercase tracking-tighter">
-          CORPO // BRAINDANCE
-        </h1>
-        <p className="text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase">Neural Link Established</p>
-        <p className="text-muted text-lg">Generate enterprise-grade nonsense for 2025.</p>
-      </header>
-      {/* Role Switcher Tabs - Neural Interface Mode Selector */}
-      <div className="relative flex items-center gap-2 mb-8 flex-col md:flex-row">
-        <span className="text-xs font-mono text-neural-primary-hover uppercase tracking-wider border-r border-neural-primary/30 pr-4">
-          [MODE]
-        </span>
-        <div className="flex bg-surface-base/80 border-2 border-neural-primary/30 p-1 shadow-neural">
-          {BUZZWORD_ROLES.map((r) => (
-            <button
-              key={r}
-              type="button"
-              aria-pressed={role === r}
-              onClick={() => {
-                setRole(r)
-                generate(r)
-              }}
-              className={`
-                relative px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-[color,background-color,border-color,box-shadow] duration-200
-                ${
-                  role === r
-                    ? 'bg-neural-primary/20 text-neural-primary-light border border-neural-primary-hover/50 shadow-neural-accent'
-                    : 'text-muted hover:text-neural-primary-hover hover:bg-surface-elevated/50 border border-transparent hover:border-neural-primary/20'
-                }
-              `}
-            >
-              {role === r && (
-                <span className="absolute -left-1 top-1/2 -translate-y-1/2 text-neural-primary-hover text-[10px]">
-                  &gt;
-                </span>
-              )}
-              {ROLE_LABELS[r]}
-            </button>
-          ))}
-        </div>
-      </div>
+    <main className="poster-page min-h-svh overflow-x-clip pb-[max(3rem,env(safe-area-inset-bottom))]">
+      <IndustrialBackdrop />
 
-      {/* Main Card - Holographic Neural Interface Display */}
-      <NeuralCard animate={animate}>
-        {/* Label */}
-        <div className="flex justify-center md:justify-between items-center mb-6 gap-2 flex-wrap">
-          <span className="text-xs font-bold text-neural-primary-hover uppercase tracking-[0.2em] border border-neural-primary/50 bg-neural-primary/10 backdrop-blur-sm px-3 py-1 rounded">
-            [{data.role} MODE]
-          </span>
-
-          {/* Fun "Synergy Score" */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted uppercase font-semibold">Synergy Score:</span>
-            <span className={`text-xl font-bold ${data.score > 90 ? 'text-status-success' : 'text-status-warning'}`}>
-              {data.score}%
-            </span>
+      <div className="page-shell relative z-10 mx-auto max-w-[88rem] px-4 sm:px-6 lg:px-10">
+        <header className="masthead page-enter">
+          <div translate="no" aria-label="CORPO // BRAINDANCE" className="wordmark">
+            <span>CORPO</span>
+            <span aria-hidden="true" className="wordmark-slash">{'//'}</span>
+            <span>BRAINDANCE</span>
           </div>
+          <div className="masthead-meta" aria-label="Application status">
+            <span>BUILD 04.77</span>
+            <span>LOCAL / OFFLINE</span>
+            <span className="masthead-status">READY</span>
+          </div>
+        </header>
+
+        <div className="hero-grid">
+          <header className="hero-copy page-enter">
+            <p className="section-code">{'/// INTERNAL COMMS DIVISION'}</p>
+            <h1 className="hero-headline">
+              Make nothing{' '}
+              <span>sound strategic.</span>
+            </h1>
+            <p className="hero-summary">
+              Turn four harmless words into promotion-ready corporate nonsense. No account, no cloud, no quarterly commitment.
+            </p>
+            <div className="hero-facts" aria-label="Product facts">
+              <span>NO LOGIN</span>
+              <span>NO BACKEND</span>
+              <span>20 LOCAL SLOTS</span>
+            </div>
+            <div aria-hidden="true" className="approval-stamp">
+              <span>APPROVED FOR</span>
+              <strong>ALL-HANDS</strong>
+            </div>
+          </header>
+
+          <section aria-labelledby="generator-title" className="generator-workbench terminal-enter">
+            <div className="module-heading">
+              <div>
+                <p className="section-code section-code--inverse">{'MODULE / 01'}</p>
+                <h2 id="generator-title">Corporate speech fabricator</h2>
+              </div>
+              <span className="module-state">LOCAL PROCESS</span>
+            </div>
+
+            <div className="mode-shell">
+              <div className="mode-heading">
+                <span id="mode-label">Select a department voice</span>
+                <span>{ROLE_LABELS[role]} ACTIVE</span>
+              </div>
+              <div role="group" aria-labelledby="mode-label" className="mode-grid">
+                {BUZZWORD_ROLES.map((candidateRole) => (
+                  <button
+                    key={candidateRole}
+                    type="button"
+                    aria-pressed={role === candidateRole}
+                    onClick={() => generate(candidateRole)}
+                    className="mode-button"
+                  >
+                    {ROLE_LABELS[candidateRole]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <BriefGeneratorPanel animate={animate}>
+              <div className="output-meta">
+                <span>VOICE / {ROLE_LABELS[data.role]}</span>
+                <span>JARGON DENSITY <strong>{data.score}%</strong></span>
+              </div>
+
+              <div key={data.phrase} aria-live="polite" aria-atomic="true" aria-busy={animate}>
+                <p data-testid="generated-phrase" className="generated-phrase phrase-reveal">
+                  “{data.phrase}”
+                </p>
+
+                <div className="generated-brief brief-reveal">
+                  <p>
+                    <span aria-hidden="true">MEMO:</span>
+                    {data.fullSentence}
+                  </p>
+                </div>
+              </div>
+            </BriefGeneratorPanel>
+
+            <div className="generator-actions">
+              <Button variant="outline" size="lg" onClick={() => generate(role)} className="cyber-action cyber-action--primary">
+                <RefreshCcw aria-hidden="true" className={`h-5 w-5 ${animate ? 'animate-spin' : ''}`} />
+                Generate jargon
+              </Button>
+              <Button variant="outline" size="lg" onClick={copyToClipboard} className="cyber-action">
+                <Copy aria-hidden="true" className="h-5 w-5" />
+                Copy memo
+              </Button>
+              <Button variant="outline" size="lg" onClick={saveBrief} className="cyber-action cyber-action--signal">
+                <BookmarkPlus aria-hidden="true" className="h-5 w-5" />
+                Save brief
+              </Button>
+            </div>
+          </section>
         </div>
 
-        {/* The Phrase */}
-        <h2 className="text-3xl md:text-5xl font-serif font-medium text-primary leading-tight mb-8 text-center md:text-left">
-          “{data.phrase}”
-        </h2>
+        <SavedBriefs />
 
-        {/* The "Meaning" - Terminal output style */}
-        <div className="bg-surface-elevated/60 border border-neural-primary/20 rounded-lg p-5 shadow-lg backdrop-blur-sm">
-          <p className="text-neural-primary-light font-mono text-sm leading-relaxed">
-            <span className="text-neural-primary-hover font-bold mr-2">&gt;</span>
-            {data.fullSentence}
-          </p>
-        </div>
-      </NeuralCard>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col md:flex-row gap-4 mt-8 w-full max-w-md">
-        <Button variant="gradient" size="xl" onClick={() => generate(role)} className="w-full md:w-1/2">
-          <RefreshCcw aria-hidden="true" className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
-          Generate
-        </Button>
-
-        <Button
-          variant="slate"
-          size="xl"
-          onClick={() => {
-            copyToClipboard()
-            if (user && user.email) {
-              submitToHR()
-            }
-          }}
-          className="w-full md:w-1/2"
-        >
-          <FilePenLine aria-hidden="true" className="w-6 h-6" />
-          <span>{user && user.email ? 'Submit to HR' : 'Copy to Clipboard'}</span>
-        </Button>
+        <footer className="site-footer">
+          <span>CORPO // BRAINDANCE</span>
+          <span>YOUR DATA NEVER LEAVES THIS DEVICE</span>
+        </footer>
       </div>
     </main>
   )

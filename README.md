@@ -1,133 +1,61 @@
 # CORPO // BRAINDANCE
 
-> Generate enterprise-grade nonsense for 2025. A satirical buzzword generator that creates hilariously corporate phrases with AI-powered synergy scores.
+A frontend-only corporate buzzword generator with a cyberpunk personnel-system aesthetic. Generate executive nonsense, copy it as a ready-made brief, and save favorites in the browser.
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)](https://tailwindcss.com/)
+The application has no backend, accounts, analytics, or environment variables. Saved briefs remain in the visitor's browser through `localStorage`.
 
-## 🎯 What is This?
+## Features
 
-**CORPO // BRAINDANCE** is a satirical web application that generates hilariously corporate buzzwords and phrases. Perfect for poking fun at corporate jargon, creating memes, or just having a laugh at the expense of corporate speak.
+- Three generation modes: Visionary, Growth, and Engineering
+- Instant local phrase generation with a simulated synergy score
+- Clipboard-ready corporate briefs
+- A local collection for up to 20 saved briefs
+- Copy or remove individual briefs
+- Copy or clear the complete collection
+- Undo support for destructive actions
+- Animated synthesis states, perspective data grid, and HUD feedback
+- Reduced-motion and increased-contrast alternatives
+- Mobile-first layouts verified down to a 320px viewport
+- Responsive, keyboard-accessible single-page interface
+- Static export suitable for passive portfolio hosting
 
-## ✨ Features
-
-### 🎲 Buzzword Generator
-
-Generate random corporate jargon based on your role:
-
-- **CEO Mode**: Visionary, holistic, paradigm-shifting nonsense
-- **Sales Mode**: Growth-focused, ROI-positive, conversion-driven phrases
-- **Tech Mode**: Cloud-native, serverless, algorithmically complex jargon
-
-Each generated phrase comes with:
-
-- A "synergy score" (80-99%) - because everything needs a score
-- A full sentence explanation - because context matters
-- Copy-to-clipboard functionality - for maximum efficiency
-- Submit to Hall of Shame (requires authentication)
-
-### 🏆 Hall of Shame
-
-View the most cringeworthy corporate phrases submitted by users:
-
-- Top 10 phrases ranked by upvotes
-- Vote on your favorites (or least favorites) - requires authentication
-- Real-time leaderboard updates with React Query
-- See which department generated the most synergy
-- View submissions by authenticated users
-
-### 🔐 Authentication
-
-- **Email/Password Signup** with unique username
-- **Username-based Signin** - sign in with email or username
-- **Google OAuth** - one-click sign-in with Google
-- **Real-time Username Availability** checking during signup
-- **User Profiles** with display name, bio, avatar, and website
-
-### 🎨 Modern Design
-
-- Cyberpunk-inspired UI with neon accents
-- Smooth animations and transitions
-- Fully responsive (mobile-first)
-- Dark theme optimized
-
-## 🚀 Try It Out
-
-Visit the live site: [Your deployment URL here]
-
-Or run locally:
+## Run locally
 
 ```bash
-git clone https://github.com/yourusername/corpo-braindance.git
-cd corpo-braindance
 npm install
-```
-
-Create a `.env.local` file:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
-
-`SUPABASE_SERVICE_ROLE_KEY` is server-only and is used to preserve username-based sign-in without exposing account emails to the browser. Never prefix it with `NEXT_PUBLIC_`.
-
-Set up the database by running the SQL schemas in Supabase SQL Editor (in order):
-
-1. **Buzzwords table**: Run `supabase/schema/buzzwords.sql`
-2. **Profiles table**: Run `supabase/schema/profiles.sql`
-3. **Votes table**: Run `supabase/schema/votes.sql`
-4. **Trigger setup**: Run `supabase/schema/trigger.sql` (if the trigger in profiles.sql doesn't work automatically)
-
-For an existing database, apply `supabase/migrations/202607150001_harden_auth_and_votes.sql` instead of rerunning the baseline schemas.
-
-Then start the development server:
-
-```bash
 npm run dev
 ```
 
-## 🛠️ Built With
+Open [http://localhost:3000](http://localhost:3000). No `.env` file or external account is required.
 
-- **Next.js 16** - Modern React framework with App Router
-- **TypeScript** - Type-safe development (strict mode)
-- **Supabase** - PostgreSQL database, authentication, and backend
-- **React Query** - Server state management with optimistic updates
-- **Zustand** - Client-side state management
-- **Server Actions** - Type-safe server mutations
-- **Tailwind CSS v4** - Utility-first styling
-- **shadcn/ui** - Accessible UI components
+## Verify and build
 
-## 📸 Screenshots
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-_Coming soon - Add screenshots of the app here_
+`npm run build` produces a deployable static site in `out/`.
 
-## 🎭 Use Cases
+## Architecture
 
-- **Memes**: Generate corporate speak for memes
-- **Presentations**: Add some "synergy" to your slides
-- **Entertainment**: Laugh at corporate jargon
-- **Portfolio**: Showcase modern web development skills
+- `src/lib/buzzwords/lab.ts` owns generation, duplicate-safe saving, and clipboard formatting.
+- `src/lib/stores/use-buzzword-store.ts` owns browser state and persists saved briefs plus the selected role.
+- `src/app/page.tsx` presents the complete generator-to-saved-briefs workflow.
 
-## 🤝 Contributing
+The previous Supabase-backed version is preserved on the `uk/fullstack-supabase-archive` branch at commit `8c40d36`.
 
-This is a portfolio project, but suggestions and improvements are welcome!
+## Local data
 
-## 📄 License
+Browser state is stored under the legacy-compatible key `corpo-braindance-dossier`. Clearing site data resets saved briefs.
 
-MIT License - feel free to use this project as inspiration for your own work.
+## Stack
 
-## 🙏 Acknowledgments
-
-- Inspired by corporate jargon and buzzword culture
-- Built with modern web technologies
-- Designed for portfolio demonstration
-
----
-
-**Built with ❤️ and excessive corporate synergy**
-
-For technical documentation, see [DOCS.md](./DOCS.md)
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Zustand
+- Vitest
