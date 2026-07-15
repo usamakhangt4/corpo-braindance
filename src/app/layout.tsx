@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Orbitron, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import SplashScreen from '../components/splash-screen'
 import { Toaster } from '@/components/ui/sonner'
 import { LocalStateHydrator } from '@/components/LocalStateHydrator'
 
@@ -37,7 +36,6 @@ export default function RootLayout({
           Skip to Main Content
         </a>
         <LocalStateHydrator />
-        <SplashScreen />
         <div id="main-content" tabIndex={-1}>
           {children}
         </div>

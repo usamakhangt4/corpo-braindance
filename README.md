@@ -13,6 +13,9 @@ The application has no backend, accounts, analytics, or environment variables. S
 - Copy or remove individual briefs
 - Copy or clear the complete collection
 - Undo support for destructive actions
+- Animated synthesis states, perspective data grid, and HUD feedback
+- Reduced-motion and increased-contrast alternatives
+- Mobile-first layouts verified down to a 320px viewport
 - Responsive, keyboard-accessible single-page interface
 - Static export suitable for passive portfolio hosting
 

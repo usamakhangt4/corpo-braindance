@@ -38,6 +38,10 @@ Hydration starts after mount through `LocalStateHydrator`, keeping server-render
 
 The empty collection is a compact prompt below the generator rather than a permanent sidebar. Once populated, briefs appear in a responsive card grid. Visitors can copy or remove one brief, copy all briefs as plain text, or clear the collection. Remove and clear actions offer Undo.
 
+### Motion and responsive behavior
+
+The interface uses CSS-only ambient and stateful motion: a perspective data grid, low-contrast data streams, one-time interface decoding, and a short cyan-to-magenta transmission sweep while a new phrase is generated. Motion never blocks input, and `prefers-reduced-motion` removes it. The saved collection uses intrinsic sizing plus a container query, while controls maintain 44px touch targets on narrow screens.
+
 ## Static deployment
 
 `next.config.ts` uses `output: 'export'`. The production build writes static assets to `out/` and requires no environment variables, server functions, database, scheduled activity, or secrets.
@@ -52,6 +56,7 @@ Any host that serves static files can deploy the project. Vercel and Netlify can
 - Destructive actions are reversible through Undo.
 - Status messages use live regions through toast primitives.
 - Reduced-motion preferences disable decorative animation.
+- Increased-contrast preferences remove ambient effects and strengthen borders.
 - Core interactions make no runtime network calls after the static application loads.
 
 ## Verification
