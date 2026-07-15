@@ -1,8 +1,6 @@
 'use client'
 
 import { create } from 'zustand'
-import type { VoteAction } from '@/lib/types/buzzword'
-
 /**
  * Voting Store - UI state only
  * Data fetching is handled by React Query hooks (use-buzzwords.ts)

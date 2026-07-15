@@ -55,7 +55,7 @@ export function BrandLogo({
       {showFullText && (
         <>
           <span className={cn('text-muted font-mono tracking-[0.3em] hidden sm:inline', sizeConfig.separator)}>
-            //
+            {'//'}
           </span>
           <span
             className={cn(

@@ -2,7 +2,7 @@
 
 > Generate enterprise-grade nonsense for 2025. A satirical buzzword generator that creates hilariously corporate phrases with AI-powered synergy scores.
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8)](https://tailwindcss.com/)
@@ -70,7 +70,10 @@ Create a `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only and is used to preserve username-based sign-in without exposing account emails to the browser. Never prefix it with `NEXT_PUBLIC_`.
 
 Set up the database by running the SQL schemas in Supabase SQL Editor (in order):
 
@@ -78,6 +81,8 @@ Set up the database by running the SQL schemas in Supabase SQL Editor (in order)
 2. **Profiles table**: Run `supabase/schema/profiles.sql`
 3. **Votes table**: Run `supabase/schema/votes.sql`
 4. **Trigger setup**: Run `supabase/schema/trigger.sql` (if the trigger in profiles.sql doesn't work automatically)
+
+For an existing database, apply `supabase/migrations/202607150001_harden_auth_and_votes.sql` instead of rerunning the baseline schemas.
 
 Then start the development server:
 
@@ -87,7 +92,7 @@ npm run dev
 
 ## 🛠️ Built With
 
-- **Next.js 15** - Modern React framework with App Router
+- **Next.js 16** - Modern React framework with App Router
 - **TypeScript** - Type-safe development (strict mode)
 - **Supabase** - PostgreSQL database, authentication, and backend
 - **React Query** - Server state management with optimistic updates

@@ -1,8 +1,8 @@
 'use server'
 
 import { BUZZWORD_DATA } from '@/lib/constants/buzzwords'
-import { buzzwordDb } from '@/lib/db/buzzword-db'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { validateBuzzwordSubmission } from '@/lib/validation/buzzword'
 import type { BuzzwordData, BuzzwordRole, BuzzwordEntry } from '@/lib/types/buzzword'
 
 type BuzzwordSource = (typeof BUZZWORD_DATA)[keyof typeof BUZZWORD_DATA]
@@ -43,25 +43,38 @@ export async function generateBuzzwordAction(role: BuzzwordRole = 'ceo'): Promis
  * This keeps database operations on the server
  * Requires authentication - only authenticated users can submit
  */
-export async function submitBuzzwordAction(data: BuzzwordData): Promise<BuzzwordEntry> {
-  // Check authentication - use getSession() for Server Actions (reads from cookies)
-  const supabase = await getSupabaseClient()
-  const {
-    data: { session },
-    error: authError,
-  } = await supabase.auth.getSession()
+export async function submitBuzzwordAction(input: unknown): Promise<BuzzwordEntry> {
+  const validation = validateBuzzwordSubmission(input)
 
-  if (authError || !session || !session.user) {
-    console.error('Auth check failed:', { authError, hasSession: !!session })
+  if (!validation.success) {
+    throw new Error(validation.error)
+  }
+
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
     throw new Error('Authentication required. Please sign in to submit buzzwords.')
   }
 
-  // User is authenticated, proceed with submission (include user_id)
-  return await buzzwordDb.createBuzzword({
-    phrase: data.phrase,
-    meaning: data.fullSentence,
-    department: data.role,
-    synergy_score: data.score,
-    user_id: session.user.id,
-  })
+  const { data, error } = await supabase
+    .from('buzzwords')
+    .insert({
+      phrase: validation.data.phrase,
+      meaning: validation.data.fullSentence,
+      department: validation.data.role,
+      synergy_score: validation.data.score,
+      user_id: user.id,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error('Unable to submit the buzzword. Please try again.')
+  }
+
+  return data as BuzzwordEntry
 }

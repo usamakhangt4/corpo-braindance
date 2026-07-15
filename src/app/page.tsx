@@ -41,7 +41,7 @@ export default function Home() {
 
     try {
       await toast.promise(submitBuzzword.mutateAsync(data), {
-        loading: 'Submitting to HR...',
+        loading: 'Submitting to HR…',
         success: 'Filed to Permanent Record.',
         error: (error) => {
           const errorMessage = error instanceof Error ? error.message : 'HR rejected your submission.'
@@ -75,12 +75,14 @@ export default function Home() {
           {BUZZWORD_ROLES.map((r) => (
             <button
               key={r}
+              type="button"
+              aria-pressed={role === r}
               onClick={() => {
                 setRole(r)
                 generate(r)
               }}
               className={`
-                relative px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200
+                relative px-6 py-2 text-xs font-mono font-bold uppercase tracking-wider transition-[color,background-color,border-color,box-shadow] duration-200
                 ${
                   role === r
                     ? 'bg-neural-primary/20 text-neural-primary-light border border-neural-primary-hover/50 shadow-neural-accent'
@@ -118,7 +120,7 @@ export default function Home() {
 
         {/* The Phrase */}
         <h2 className="text-3xl md:text-5xl font-serif font-medium text-primary leading-tight mb-8 text-center md:text-left">
-          "{data.phrase}"
+          “{data.phrase}”
         </h2>
 
         {/* The "Meaning" - Terminal output style */}
@@ -133,7 +135,7 @@ export default function Home() {
       {/* Action Buttons */}
       <div className="flex flex-col md:flex-row gap-4 mt-8 w-full max-w-md">
         <Button variant="gradient" size="xl" onClick={() => generate(role)} className="w-full md:w-1/2">
-          <RefreshCcw className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
+          <RefreshCcw aria-hidden="true" className={`w-6 h-6 ${animate ? 'animate-spin' : ''}`} />
           Generate
         </Button>
 
@@ -148,7 +150,7 @@ export default function Home() {
           }}
           className="w-full md:w-1/2"
         >
-          <FilePenLine className="w-6 h-6" />
+          <FilePenLine aria-hidden="true" className="w-6 h-6" />
           <span>{user && user.email ? 'Submit to HR' : 'Copy to Clipboard'}</span>
         </Button>
       </div>

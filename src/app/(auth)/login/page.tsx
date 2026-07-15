@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { AuthCard } from '@/components/auth-card'
 import { ROUTES } from '@/lib/constants/routes'
 import { useState } from 'react'

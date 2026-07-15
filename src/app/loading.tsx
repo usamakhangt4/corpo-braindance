@@ -28,7 +28,7 @@ export default function Loading() {
 
             {/* Loading Message */}
             <h2 className="text-2xl md:text-4xl font-serif font-medium text-primary leading-tight mb-6">
-              Establishing Neural Link...
+              Establishing Neural Link…
             </h2>
 
             {/* Terminal output style message */}
@@ -36,15 +36,15 @@ export default function Loading() {
               <div className="text-neural-primary-light font-mono text-sm leading-relaxed space-y-2">
                 <p>
                   <span className="text-neural-primary-hover font-bold mr-2">&gt;</span>
-                  Connecting to neural network...
+                  Connecting to neural network…
                 </p>
                 <p className="animate-pulse">
                   <span className="text-neural-primary-hover font-bold mr-2">&gt;</span>
-                  Syncing data streams...
+                  Syncing data streams…
                 </p>
                 <p className="opacity-75 animate-pulse" style={{ animationDelay: '0.5s' }}>
                   <span className="text-neural-primary-hover font-bold mr-2">&gt;</span>
-                  Loading interface...
+                  Loading interface…
                 </p>
               </div>
             </div>

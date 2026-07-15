@@ -1,13 +1,12 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { buzzwordDb } from '@/lib/db/buzzword-db'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
 import { HALL_OF_SHAME_LIMIT } from '@/lib/constants/buzzwords'
 import type { GetAllBuzzwordsOptions } from '@/lib/db/buzzword-db'
-import type { BuzzwordEntry, BuzzwordData } from '@/lib/types/buzzword'
+import type { BuzzwordData } from '@/lib/types/buzzword'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
 /**
@@ -51,7 +50,7 @@ export function useTopBuzzwords(limit: number = HALL_OF_SHAME_LIMIT, userId?: st
     let isMounted = true
 
     const setupSubscription = async () => {
-      const supabase = await getSupabaseClient()
+      const supabase = getSupabaseBrowserClient()
       const channel = supabase
         .channel(`buzzwords-changes-${limit}`)
         .on(
@@ -63,20 +62,6 @@ export function useTopBuzzwords(limit: number = HALL_OF_SHAME_LIMIT, userId?: st
           },
           async () => {
             // When changes occur, refetch the top buzzwords to get updated ordering
-            if (isMounted) {
-              await queryClient.invalidateQueries({ queryKey: buzzwordKeys.top(limit), refetchType: 'active' })
-            }
-          },
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*', // Listen to INSERT, UPDATE, DELETE
-            schema: 'public',
-            table: 'buzzword_votes',
-          },
-          async () => {
-            // When votes change, refetch to get updated vote counts and user_vote
             if (isMounted) {
               await queryClient.invalidateQueries({ queryKey: buzzwordKeys.top(limit), refetchType: 'active' })
             }
@@ -158,57 +143,6 @@ export function useVoteBuzzword() {
     onError: (error) => {
       // Error toast is handled in the component using toast.promise
       console.error('Vote error:', error)
-    },
-  })
-}
-
-/**
- * Hook to update upvotes with optimistic updates
- * @deprecated Use useVoteBuzzword instead for proper vote tracking
- */
-export function useUpdateUpvotes() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: ({ id, upvotes }: { id: number; upvotes: number }) => buzzwordDb.updateUpvotes(id, upvotes),
-    onMutate: async ({ id, upvotes }) => {
-      // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: buzzwordKeys.all })
-
-      // Snapshot previous values - check all possible query keys
-      const previousTop = queryClient.getQueryData<BuzzwordEntry[]>(buzzwordKeys.top())
-      const previousAll = queryClient.getQueryData<BuzzwordEntry[]>(buzzwordKeys.allPhrases())
-
-      // Optimistically update all relevant queries
-      if (previousTop) {
-        queryClient.setQueryData<BuzzwordEntry[]>(
-          buzzwordKeys.top(),
-          previousTop.map((entry) => (entry.id === id ? { ...entry, upvotes } : entry)),
-        )
-      }
-
-      if (previousAll) {
-        queryClient.setQueryData<BuzzwordEntry[]>(
-          buzzwordKeys.allPhrases(),
-          previousAll.map((entry) => (entry.id === id ? { ...entry, upvotes } : entry)),
-        )
-      }
-
-      return { previousTop, previousAll }
-    },
-    onError: (_error, _variables, context) => {
-      // Rollback on error
-      if (context?.previousTop) {
-        queryClient.setQueryData(buzzwordKeys.top(), context.previousTop)
-      }
-      if (context?.previousAll) {
-        queryClient.setQueryData(buzzwordKeys.allPhrases(), context.previousAll)
-      }
-    },
-    onSuccess: () => {
-      // Invalidate to refetch and get correct ordering
-      // Use refetchType: 'active' to only refetch active queries, not all
-      queryClient.invalidateQueries({ queryKey: buzzwordKeys.all, refetchType: 'active' })
     },
   })
 }

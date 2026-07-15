@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -50,29 +50,38 @@ export function AuthCard({
     checking: false,
     available: null,
   })
+  const usernameRequestRef = useRef(0)
 
-  // Check username availability
-  const checkUsername = async (value: string) => {
-    if (!value || value.length < 3) {
-      setUsernameCheck({ checking: false, available: null })
-      return
+  useEffect(() => {
+    if (mode !== 'signup' || username.length < 3) return
+
+    const requestId = ++usernameRequestRef.current
+    const timer = window.setTimeout(async () => {
+      try {
+        const { checkUsernameAvailability } = await import('@/app/actions/auth')
+        const { available, error: checkError } = await checkUsernameAvailability(username)
+
+        if (usernameRequestRef.current === requestId) {
+          setUsernameCheck({
+            checking: false,
+            available,
+            message: checkError || (available ? 'Username available' : 'Username already taken'),
+          })
+        }
+      } catch {
+        if (usernameRequestRef.current === requestId) {
+          setUsernameCheck({ checking: false, available: null, message: 'Unable to check username availability.' })
+        }
+      }
+    }, 350)
+
+    return () => {
+      window.clearTimeout(timer)
+      if (usernameRequestRef.current === requestId) {
+        usernameRequestRef.current += 1
+      }
     }
-
-    setUsernameCheck({ checking: true, available: null })
-
-    try {
-      const { checkUsernameAvailability } = await import('@/app/actions/auth')
-      const { available, error: checkError } = await checkUsernameAvailability(value)
-
-      setUsernameCheck({
-        checking: false,
-        available,
-        message: checkError || (available ? 'Username available' : 'Username already taken'),
-      })
-    } catch (err) {
-      setUsernameCheck({ checking: false, available: null, message: 'Failed to check username' })
-    }
-  }
+  }, [mode, username])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -82,14 +91,14 @@ export function AuthCard({
     try {
       if (mode === 'signup') {
         // Validate username for signup
-        if (!username || username.length < 3) {
-          setError('Username must be at least 3 characters')
+        if (!/^[a-zA-Z0-9_]{3,30}$/.test(username)) {
+          setError('Username must be 3–30 characters using only letters, numbers, and underscores.')
           setIsLoading(false)
           return
         }
 
-        if (usernameCheck.available === false) {
-          setError('Username is already taken')
+        if (usernameCheck.checking || usernameCheck.available !== true) {
+          setError('Choose an available username before registering.')
           setIsLoading(false)
           return
         }
@@ -130,7 +139,9 @@ export function AuthCard({
   }
 
   const switchMode = (newMode: AuthMode) => {
+    usernameRequestRef.current += 1
     setError(null)
+    setUsernameCheck({ checking: false, available: null })
     onModeChange(newMode)
   }
 
@@ -148,11 +159,15 @@ export function AuthCard({
           {mode === 'login' ? 'Email or Username' : 'Email Address'}
         </Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+          <Mail aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
           <Input
             id="emailOrUsername"
+            name={mode === 'login' ? 'identifier' : 'email'}
             type={mode === 'login' ? 'text' : 'email'}
-            placeholder={mode === 'login' ? 'user@corpo.com or username' : 'user@corpo.com'}
+            inputMode={mode === 'login' ? 'text' : 'email'}
+            autoComplete={mode === 'login' ? 'username' : 'email'}
+            spellCheck={false}
+            placeholder={mode === 'login' ? 'name@example.com or username…' : 'name@example.com…'}
             value={emailOrUsername}
             onChange={(e) => setEmailOrUsername(e.target.value)}
             required
@@ -170,17 +185,20 @@ export function AuthCard({
             Username
           </Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+            <User aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
             <Input
               id="username"
+              name="username"
               type="text"
-              placeholder="cool_username"
+              autoComplete="username"
+              spellCheck={false}
+              placeholder="cool_username…"
               value={username}
               onChange={(e) => {
                 const value = e.target.value.replace(/[^a-zA-Z0-9_]/g, '')
                 setUsername(value)
                 if (value.length >= 3) {
-                  checkUsername(value)
+                  setUsernameCheck({ checking: true, available: null, message: 'Checking availability…' })
                 } else {
                   setUsernameCheck({ checking: false, available: null })
                 }
@@ -190,23 +208,30 @@ export function AuthCard({
               variant="neural"
               hasIcon
               minLength={3}
-              pattern="[a-zA-Z0-9_]{3,}"
+              maxLength={30}
+              pattern="[a-zA-Z0-9_]{3,30}"
+              aria-describedby="username-status"
+              aria-invalid={usernameCheck.available === false}
             />
             {/* Username availability indicator */}
             {username.length >= 3 && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 {usernameCheck.checking ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-muted" />
+                  <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin text-muted" />
                 ) : usernameCheck.available === true ? (
-                  <CheckCircle2 className="w-4 h-4 text-status-success" />
+                  <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-status-success" />
                 ) : usernameCheck.available === false ? (
-                  <XCircle className="w-4 h-4 text-status-error" />
+                  <XCircle aria-hidden="true" className="w-4 h-4 text-status-error" />
                 ) : null}
               </div>
             )}
           </div>
           {usernameCheck.message && username.length >= 3 && (
             <p
+              id="username-status"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
               className={`text-xs font-mono ${
                 usernameCheck.available === true
                   ? 'text-status-success'
@@ -227,10 +252,12 @@ export function AuthCard({
           Password
         </Label>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+          <Lock aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
           <Input
             id="password"
+            name="password"
             type="password"
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -243,11 +270,11 @@ export function AuthCard({
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" disabled={isLoading} variant="neural" className="w-full">
+      <Button type="submit" disabled={isLoading} aria-busy={isLoading} variant="neural" className="w-full">
         {isLoading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            {mode === 'login' ? 'Establishing Connection...' : 'Registering...'}
+            <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
+            {mode === 'login' ? 'Establishing Connection…' : 'Registering…'}
           </>
         ) : mode === 'login' ? (
           'Authenticate'
@@ -282,7 +309,7 @@ export function AuthCard({
         variant="slate"
         className="w-full"
       >
-        <Chrome className="w-4 h-4 mr-2" />
+        <Chrome aria-hidden="true" className="w-4 h-4 mr-2" />
         Continue with Google
       </Button>
     </form>
@@ -318,7 +345,7 @@ export function AuthCard({
           <CardFooter className="text-center text-sm text-muted grid">
             {mode === 'login' ? (
               <>
-                <span>Don't have an account? </span>
+                <span>Don&apos;t have an account? </span>
                 <Button
                   variant="link"
                   type="button"

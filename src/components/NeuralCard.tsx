@@ -36,7 +36,7 @@ export function NeuralCard({
 
       <div
         className={cn(
-          'relative bg-surface-base/90 backdrop-blur-sm border-2 border-neural-primary/40 rounded-lg p-4 sm:p-6 md:p-8 lg:p-12 shadow-neural-lg overflow-hidden transition-all duration-300 z-10',
+          'relative bg-surface-base/90 backdrop-blur-sm border-2 border-neural-primary/40 rounded-lg p-4 sm:p-6 md:p-8 lg:p-12 shadow-neural-lg overflow-hidden transition-[border-color,box-shadow,transform,opacity] duration-300 z-10',
           'hover:border-neural-primary-hover/60 hover:shadow-neural-xl',
           animate && 'scale-95 opacity-80',
           !animate && 'scale-100 opacity-100',
