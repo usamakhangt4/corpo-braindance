@@ -164,6 +164,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -390,6 +391,22 @@
   100% {
     transform: translate(0);
     text-shadow: -2px 0 #00ffff, 2px 0 #ff00ff, -1px 1px #00ffff, 1px -1px #ff00ff;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .glitch-text,
+  .glitch-text:hover {
+    animation: none;
   }
 }
 

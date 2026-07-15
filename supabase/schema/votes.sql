@@ -24,14 +24,16 @@ ALTER TABLE buzzword_votes ENABLE ROW LEVEL SECURITY;
 -- RLS Policies
 -- Drop existing policies if they exist (to avoid errors on re-run)
 DROP POLICY IF EXISTS "Users can read all votes" ON buzzword_votes;
+DROP POLICY IF EXISTS "Users can read own votes" ON buzzword_votes;
 DROP POLICY IF EXISTS "Users can insert own votes" ON buzzword_votes;
 DROP POLICY IF EXISTS "Users can update own votes" ON buzzword_votes;
 DROP POLICY IF EXISTS "Users can delete own votes" ON buzzword_votes;
 
--- Allow anyone to read votes (needed to show vote counts)
-CREATE POLICY "Users can read all votes"
+-- Aggregate vote counts live on buzzwords; individual choices remain private.
+CREATE POLICY "Users can read own votes"
   ON buzzword_votes FOR SELECT
-  USING (true);
+  TO authenticated
+  USING (auth.uid() = user_id);
 
 -- Allow authenticated users to insert their own votes
 CREATE POLICY "Users can insert own votes"
@@ -49,23 +51,47 @@ CREATE POLICY "Users can delete own votes"
   ON buzzword_votes FOR DELETE
   USING (auth.uid() = user_id);
 
+-- Prevent clients from moving votes to another buzzword or changing ownership.
+REVOKE UPDATE ON TABLE public.buzzword_votes FROM authenticated;
+GRANT UPDATE (vote_type, updated_at) ON TABLE public.buzzword_votes TO authenticated;
+
 -- Function to update buzzword upvotes count based on votes
 -- This function calculates the actual upvotes count from the votes table
 CREATE OR REPLACE FUNCTION update_buzzword_upvotes_count()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-  -- Recalculate upvotes count for the affected buzzword
-  UPDATE buzzwords
+  IF TG_OP = 'UPDATE' AND OLD.buzzword_id IS DISTINCT FROM NEW.buzzword_id THEN
+    UPDATE public.buzzwords
+    SET upvotes = (
+      SELECT COALESCE(SUM(CASE WHEN vote_type = 'upvote' THEN 1 ELSE -1 END), 0)
+      FROM public.buzzword_votes
+      WHERE buzzword_id = OLD.buzzword_id
+    )
+    WHERE id = OLD.buzzword_id;
+  END IF;
+
+  UPDATE public.buzzwords
   SET upvotes = (
     SELECT COALESCE(SUM(CASE WHEN vote_type = 'upvote' THEN 1 ELSE -1 END), 0)
-    FROM buzzword_votes
-    WHERE buzzword_id = COALESCE(NEW.buzzword_id, OLD.buzzword_id)
+    FROM public.buzzword_votes
+    WHERE buzzword_id = CASE WHEN TG_OP = 'DELETE' THEN OLD.buzzword_id ELSE NEW.buzzword_id END
   )
-  WHERE id = COALESCE(NEW.buzzword_id, OLD.buzzword_id);
+  WHERE id = CASE WHEN TG_OP = 'DELETE' THEN OLD.buzzword_id ELSE NEW.buzzword_id END;
   
-  RETURN COALESCE(NEW, OLD);
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.update_buzzword_upvotes_count() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.update_buzzword_upvotes_count() FROM anon, authenticated;
 
 -- Trigger to update upvotes count when votes change
 DROP TRIGGER IF EXISTS trigger_update_buzzword_upvotes ON buzzword_votes;
@@ -74,17 +100,5 @@ CREATE TRIGGER trigger_update_buzzword_upvotes
   FOR EACH ROW
   EXECUTE FUNCTION update_buzzword_upvotes_count();
 
--- Function to get user vote for a buzzword
-CREATE OR REPLACE FUNCTION get_user_vote(p_buzzword_id BIGINT, p_user_id UUID)
-RETURNS TEXT AS $$
-DECLARE
-  v_vote_type TEXT;
-BEGIN
-  SELECT vote_type INTO v_vote_type
-  FROM buzzword_votes
-  WHERE buzzword_id = p_buzzword_id AND user_id = p_user_id;
-  
-  RETURN v_vote_type;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+DROP FUNCTION IF EXISTS public.get_user_vote(BIGINT, UUID);
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useAuthStore } from '@/lib/stores/use-auth-store'
 import { useQuery } from '@tanstack/react-query'
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
 import type { Profile } from '@/lib/types/profile'
 
 interface DropdownMenuItem {
@@ -29,16 +29,21 @@ const MENU_ITEM_BASE_CLASSES = 'text-xs uppercase tracking-wider cursor-pointer 
 const MENU_ITEM_DEFAULT_CLASSES =
   'text-secondary hover:text-neural-primary-light hover:bg-surface-overlay/50 focus:bg-surface-overlay/50 focus:text-neural-primary-light'
 
+const DROPDOWN_MENU_ITEMS: DropdownMenuItem[] = [
+  { label: 'Profile', href: '/profile', icon: User },
+  { label: 'Settings', href: '/settings', icon: Settings },
+]
+
 export default function UserDropdown() {
   const { user, signOut } = useAuthStore()
-  const [avatarError, setAvatarError] = useState(false)
+  const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null)
 
   // Fetch user profile to get avatar_url
-  const { data: profile, isLoading: profileLoading } = useQuery<Profile | null>({
+  const { data: profile } = useQuery<Profile | null>({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user?.id) return null
-      const supabase = await getSupabaseClient()
+      const supabase = getSupabaseBrowserClient()
       const { data, error } = await supabase
         .from('profiles')
         .select('avatar_url, display_name, username')
@@ -61,29 +66,9 @@ export default function UserDropdown() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const DROPDOWN_MENU_ITEMS: DropdownMenuItem[] = [
-    {
-      label: 'Profile',
-      href: '/profile',
-      icon: User,
-    },
-    {
-      label: 'Settings',
-      href: '/settings',
-      icon: Settings,
-    },
-  ]
-
   const handleSignOut = async () => {
     await signOut()
   }
-
-  // Reset avatarError when avatar_url changes
-  useEffect(() => {
-    if (profile?.avatar_url) {
-      setAvatarError(false)
-    }
-  }, [profile?.avatar_url])
 
   // Process Google avatar URL - remove size parameter if present to avoid issues
   const processAvatarUrl = (url: string | null | undefined): string | null => {
@@ -110,11 +95,13 @@ export default function UserDropdown() {
         >
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-neural-primary/20 border border-neural-primary/30 flex items-center justify-center overflow-hidden relative">
-              {avatarUrl && !avatarError ? (
-                <img
+              {avatarUrl && failedAvatarUrl !== avatarUrl ? (
+                <Image
                   key={avatarUrl}
                   src={avatarUrl}
                   alt={displayName}
+                  width={24}
+                  height={24}
                   className="w-full h-full object-cover rounded-full"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -123,18 +110,15 @@ export default function UserDropdown() {
                       error: e,
                       profileAvatarUrl: profile?.avatar_url,
                     })
-                    setAvatarError(true)
-                  }}
-                  onLoad={() => {
-                    setAvatarError(false)
+                    setFailedAvatarUrl(avatarUrl)
                   }}
                 />
               ) : (
-                <User className="w-3.5 h-3.5 text-neural-primary-hover" />
+                <User aria-hidden="true" className="w-3.5 h-3.5 text-neural-primary-hover" />
               )}
             </div>
             <span className="hidden sm:inline">{displayName}</span>
-            <ChevronDown className="w-3 h-3 hidden sm:inline" />
+            <ChevronDown aria-hidden="true" className="w-3 h-3 hidden sm:inline" />
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -154,7 +138,7 @@ export default function UserDropdown() {
         {DROPDOWN_MENU_ITEMS.map((item) => (
           <DropdownMenuItem key={item.href} asChild className={cn(MENU_ITEM_BASE_CLASSES, MENU_ITEM_DEFAULT_CLASSES)}>
             <Link href={item.href} className="flex items-center gap-2">
-              <item.icon className="w-4 h-4 text-inherit" />
+              <item.icon aria-hidden="true" className="w-4 h-4 text-inherit" />
               <span>{item.label}</span>
             </Link>
           </DropdownMenuItem>
@@ -163,7 +147,7 @@ export default function UserDropdown() {
         <DropdownMenuSeparator className="bg-base" />
 
         <DropdownMenuItem onClick={handleSignOut} variant="destructive" className={cn(MENU_ITEM_BASE_CLASSES)}>
-          <LogOut className="w-4 h-4" />
+          <LogOut aria-hidden="true" className="w-4 h-4" />
           <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

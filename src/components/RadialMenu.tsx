@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useLayoutEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LucideIcon, ArrowLeft } from 'lucide-react'
@@ -35,63 +35,18 @@ export default function RadialMenu({
   const pathname = usePathname()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [screenCenter, setScreenCenter] = useState({ x: 0, y: 0 })
-  const [isTransitioning, setIsTransitioning] = useState(false)
-  const previousShowBackButtonRef = useRef<boolean>(showBackButton)
-  const previousItemsRef = useRef<RadialMenuItem[]>([])
   const menuRef = useRef<HTMLDivElement>(null)
+  const isTransitioning = false
 
-  // Detect menu transitions synchronously before paint
-  useLayoutEffect(() => {
-    if (isOpen && items.length > 0) {
-      const menuChanged =
-        previousShowBackButtonRef.current !== showBackButton ||
-        previousItemsRef.current.length !== items.length ||
-        previousItemsRef.current.some((prevItem, index) => {
-          const currentItem = items[index]
-          return !currentItem || prevItem.href !== currentItem.href || prevItem.action !== currentItem.action
-        })
+  const closeMenu = useCallback(() => {
+    setHoveredIndex(null)
+    onClose()
+  }, [onClose])
 
-      if (menuChanged && previousItemsRef.current.length > 0) {
-        // Set transitioning synchronously before React paints
-        setIsTransitioning(true)
-        setHoveredIndex(null)
-
-        // Use requestAnimationFrame to ensure state is set before next paint
-        requestAnimationFrame(() => {
-          // Reset transition state after animation completes
-          setTimeout(() => {
-            setIsTransitioning(false)
-          }, 400)
-        })
-
-        // Update refs
-        previousShowBackButtonRef.current = showBackButton
-        previousItemsRef.current = items
-      } else {
-        // Update refs for first render or when no change
-        if (previousItemsRef.current.length === 0 || !menuChanged) {
-          previousShowBackButtonRef.current = showBackButton
-          previousItemsRef.current = items
-        }
-      }
-    } else if (!isOpen) {
-      // Reset when menu closes
-      previousShowBackButtonRef.current = showBackButton
-      previousItemsRef.current = []
-      setIsTransitioning(false)
-      setHoveredIndex(null)
-    }
-  }, [isOpen, items, showBackButton])
-
-  // Reset hover state when menu closes
-  useEffect(() => {
-    if (!isOpen) {
-      setHoveredIndex(null)
-      setIsTransitioning(false)
-      previousShowBackButtonRef.current = showBackButton
-      previousItemsRef.current = []
-    }
-  }, [isOpen, showBackButton])
+  const goBack = useCallback(() => {
+    setHoveredIndex(null)
+    onBack?.()
+  }, [onBack])
 
   // Calculate screen center on mount and window resize
   useEffect(() => {
@@ -127,34 +82,63 @@ export default function RadialMenu({
     return { x, y, angle }
   })
 
-  // Close menu on outside click
+  // Trap focus, close on outside click/Escape, and restore the trigger on close.
   useEffect(() => {
     if (!isOpen) return
 
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstFocusable = menuRef.current?.querySelector<HTMLElement>(focusableSelector)
+      firstFocusable?.focus()
+    })
+
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose()
+        closeMenu()
       }
     }
 
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (showBackButton && onBack) {
-          onBack()
+          goBack()
         } else {
-          onClose()
+          closeMenu()
+        }
+        return
+      }
+
+      if (e.key === 'Tab' && menuRef.current) {
+        const focusable = Array.from(menuRef.current.querySelectorAll<HTMLElement>(focusableSelector))
+        if (focusable.length === 0) {
+          e.preventDefault()
+          menuRef.current.focus()
+          return
+        }
+
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
         }
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
+      window.cancelAnimationFrame(focusFrame)
       document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocused?.focus()
     }
-  }, [isOpen, onClose, showBackButton, onBack])
+  }, [closeMenu, goBack, isOpen, onBack, showBackButton])
 
   // Prevent body scroll when menu is open
   useEffect(() => {
@@ -180,6 +164,7 @@ export default function RadialMenu({
   const glassCircleOffset = (menuSize - glassCircleSize) / 2
 
   const handleItemClick = (item: RadialMenuItem, e: React.MouseEvent) => {
+    setHoveredIndex(null)
     if (item.action) {
       e.preventDefault()
       onItemClick?.(item)
@@ -197,12 +182,17 @@ export default function RadialMenu({
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
         }}
-        onClick={onClose}
+        onClick={closeMenu}
         aria-hidden="true"
       />
 
       <div
+        id="mobile-navigation-menu"
         ref={menuRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile navigation"
+        tabIndex={-1}
         className="fixed pointer-events-auto z-99"
         style={{
           left: `${menuLeft}px`,
@@ -213,7 +203,7 @@ export default function RadialMenu({
       >
         {/* Glassmorphic background circle */}
         <div
-          className="absolute rounded-full pointer-events-none transition-all duration-500 ease-out"
+          className="absolute rounded-full pointer-events-none transition-[transform,opacity] duration-500 ease-out"
           style={{
             left: `${glassCircleOffset}px`,
             top: `${glassCircleOffset}px`,
@@ -298,7 +288,7 @@ export default function RadialMenu({
                 stroke="rgba(6, 182, 212, 0.4)"
                 strokeWidth="1.5"
                 className={cn(
-                  'transition-all duration-300 delay-300 ease-linear',
+                  'transition-[stroke,filter] duration-300 delay-300 ease-linear',
                   hoveredIndex === index && !isTransitioning && 'stroke-cyan-400 stroke-[2.5px]',
                 )}
                 style={{
@@ -313,13 +303,13 @@ export default function RadialMenu({
         {/* Back button - shown when in profile menu */}
         {showBackButton && onBack && (
           <button
-            onClick={onBack}
+            onClick={goBack}
             className={cn(
               'absolute w-12 h-12 rounded-lg z-25',
               'bg-surface-elevated/95 backdrop-blur-md border-2',
               'border-neural-primary/50 shadow-lg shadow-neural',
               'flex items-center justify-center',
-              'transition-all duration-400 ease-out',
+              'transition-[background-color,border-color,box-shadow,transform,opacity] duration-400 ease-out',
               'hover:scale-110 hover:z-30 hover:border-neural-primary-hover hover:shadow-xl hover:shadow-neural-accent',
               'focus-visible:outline-none focus-visible:ring-2',
               'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
@@ -354,7 +344,7 @@ export default function RadialMenu({
                     'absolute w-14 h-14 rounded-lg z-25',
                     'bg-surface-elevated/95 backdrop-blur-md border-2',
                     'flex items-center justify-center',
-                    'transition-all duration-400 ease-out',
+                    'transition-[background-color,border-color,box-shadow,transform,opacity] duration-400 ease-out',
                     'hover:scale-110 hover:z-30',
                     'focus-visible:outline-none focus-visible:ring-2',
                     'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
@@ -389,7 +379,7 @@ export default function RadialMenu({
                   'absolute w-14 h-14 rounded-lg z-25',
                   'bg-surface-elevated/95 backdrop-blur-md border-2',
                   'flex items-center justify-center',
-                  'transition-all duration-400 ease-out',
+                  'transition-[background-color,border-color,box-shadow,transform,opacity] duration-400 ease-out',
                   'hover:scale-110 hover:z-30',
                   'focus-visible:outline-none focus-visible:ring-2',
                   'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
@@ -435,7 +425,7 @@ export default function RadialMenu({
               'absolute w-16 h-16 rounded-full z-20',
               'bg-surface-elevated/95 backdrop-blur-md border-2',
               'flex flex-col items-center justify-center gap-1',
-              'transition-all duration-400 ease-out',
+              'transition-[background-color,border-color,box-shadow,transform,opacity] duration-400 ease-out',
               'hover:scale-115 hover:z-30',
               'focus-visible:outline-none focus-visible:ring-2',
               'focus-visible:ring-neural-primary/50 focus-visible:ring-offset-2',
@@ -487,7 +477,7 @@ export default function RadialMenu({
                     'bg-surface-elevated/98 border pointer-events-none whitespace-nowrap',
                     'text-xs font-mono uppercase tracking-wider',
                     'backdrop-blur-md shadow-lg',
-                    'transition-all duration-300',
+                    'transition-[background-color,border-color,opacity] duration-300',
                     isHovered && isLogout && 'text-status-error border-status-error/80 scale-110',
                     'border-status-error/50 text-status-error',
                   )}
@@ -533,7 +523,7 @@ export default function RadialMenu({
                   'bg-surface-elevated/98 border pointer-events-none whitespace-nowrap',
                   'text-xs font-mono uppercase tracking-wider',
                   'backdrop-blur-md shadow-lg',
-                  'transition-all duration-300',
+                  'transition-[background-color,border-color,opacity] duration-300',
                   isHovered && !isLogout && 'text-neural-primary-light border-neural-primary-hover/80 scale-110',
                   isActive && 'text-neural-primary-light border-neural-primary-hover/80',
                   'border-neural-primary/50 text-neural-primary-hover',

@@ -3,7 +3,7 @@
  * Works in both client and server contexts
  */
 
-import { getSupabaseClient } from '@/lib/supabase/client'
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser'
 import type { BuzzwordEntry } from '@/lib/types/buzzword'
 
 export type SortOption = 'newest' | 'oldest' | 'most_upvotes' | 'least_upvotes'
@@ -17,10 +17,6 @@ export interface GetAllBuzzwordsOptions {
 export interface IBuzzwordDb {
   getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]>
   getAllBuzzwords(options?: GetAllBuzzwordsOptions & { userId?: string | null }): Promise<BuzzwordEntry[]>
-  createBuzzword(
-    data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string },
-  ): Promise<BuzzwordEntry>
-  updateUpvotes(id: number, upvotes: number): Promise<BuzzwordEntry>
   getById(id: number, userId?: string | null): Promise<BuzzwordEntry | null>
   voteBuzzword(buzzwordId: number, userId: string, voteType: 'upvote' | 'downvote'): Promise<void>
   getUserVote(buzzwordId: number, userId: string): Promise<'upvote' | 'downvote' | null>
@@ -28,7 +24,7 @@ export interface IBuzzwordDb {
 
 class BuzzwordDb implements IBuzzwordDb {
   async getTopBuzzwords(limit: number, userId?: string | null): Promise<BuzzwordEntry[]> {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseBrowserClient()
 
     // Fetch buzzwords
     const { data, error } = await supabase
@@ -77,7 +73,7 @@ class BuzzwordDb implements IBuzzwordDb {
 
   async getAllBuzzwords(options: GetAllBuzzwordsOptions & { userId?: string | null } = {}): Promise<BuzzwordEntry[]> {
     const { limit = 50, offset = 0, sortBy = 'newest', userId } = options
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseBrowserClient()
 
     let query = supabase.from('buzzwords').select('*')
 
@@ -130,37 +126,8 @@ class BuzzwordDb implements IBuzzwordDb {
     return entries
   }
 
-  async createBuzzword(
-    data: Omit<BuzzwordEntry, 'id' | 'created_at' | 'upvotes' | 'user_id'> & { user_id: string },
-  ): Promise<BuzzwordEntry> {
-    const supabase = await getSupabaseClient()
-    const { data: result, error } = await supabase
-      .from('buzzwords')
-      .insert({
-        phrase: data.phrase,
-        meaning: data.meaning,
-        department: data.department,
-        synergy_score: data.synergy_score,
-        user_id: data.user_id,
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-    return result as BuzzwordEntry
-  }
-
-  async updateUpvotes(id: number, upvotes: number): Promise<BuzzwordEntry> {
-    const supabase = await getSupabaseClient()
-    const { data, error } = await supabase.from('buzzwords').update({ upvotes }).eq('id', id).select().single()
-
-    if (error) throw error
-    if (!data) throw new Error(`Buzzword with id ${id} not found`)
-    return data as BuzzwordEntry
-  }
-
   async getById(id: number, userId?: string | null): Promise<BuzzwordEntry | null> {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseBrowserClient()
     const { data, error } = await supabase.from('buzzwords').select('*').eq('id', id).single()
     if (error) return null
 
@@ -185,7 +152,7 @@ class BuzzwordDb implements IBuzzwordDb {
   }
 
   async voteBuzzword(buzzwordId: number, userId: string, voteType: 'upvote' | 'downvote'): Promise<void> {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseBrowserClient()
 
     // Check if user already voted
     const { data: existingVote } = await supabase
@@ -228,7 +195,7 @@ class BuzzwordDb implements IBuzzwordDb {
   }
 
   async getUserVote(buzzwordId: number, userId: string): Promise<'upvote' | 'downvote' | null> {
-    const supabase = await getSupabaseClient()
+    const supabase = getSupabaseBrowserClient()
     const { data, error } = await supabase
       .from('buzzword_votes')
       .select('vote_type')

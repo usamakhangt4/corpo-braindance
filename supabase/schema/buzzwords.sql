@@ -5,10 +5,10 @@
 -- Note: If table already exists without user_id, run SUPABASE_MIGRATION_ADD_USER_ID.sql first
 CREATE TABLE IF NOT EXISTS buzzwords (
   id BIGSERIAL PRIMARY KEY,
-  phrase TEXT NOT NULL,
-  meaning TEXT NOT NULL,
-  department TEXT NOT NULL,
-  synergy_score INTEGER NOT NULL,
+  phrase TEXT NOT NULL CHECK (char_length(phrase) BETWEEN 1 AND 200),
+  meaning TEXT NOT NULL CHECK (char_length(meaning) BETWEEN 1 AND 1000),
+  department TEXT NOT NULL CHECK (department IN ('CEO', 'SALES', 'TECH')),
+  synergy_score INTEGER NOT NULL CHECK (synergy_score BETWEEN 0 AND 100),
   upvotes INTEGER DEFAULT 0 NOT NULL,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -49,16 +49,7 @@ CREATE POLICY "Authenticated users can insert buzzwords"
   ON buzzwords FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Allow only authenticated users to update upvotes (for voting)
-CREATE POLICY "Authenticated users can update upvotes"
-  ON buzzwords FOR UPDATE
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'authenticated');
-
--- Optional: Allow authenticated users to update their own entries
--- Uncomment if you want users to edit their submissions
--- CREATE POLICY IF NOT EXISTS "Users can update own buzzwords"
---   ON buzzwords FOR UPDATE
---   USING (auth.uid()::text = user_id::text)
---   WITH CHECK (auth.uid()::text = user_id::text);
+-- Vote totals are maintained only by the SECURITY DEFINER trigger in votes.sql.
+-- RLS policies cannot restrict UPDATE to a column, so remove the table privilege.
+REVOKE UPDATE ON TABLE public.buzzwords FROM authenticated;
 

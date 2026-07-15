@@ -22,13 +22,15 @@ export function ErrorMessage({
 }: ErrorMessageProps) {
   return (
     <div
+      role="alert"
+      aria-live="assertive"
       className={cn(
         'flex items-center gap-2 p-3 rounded-md border text-sm',
         variantClasses[variant],
         className,
       )}
     >
-      {showIcon && <AlertCircle className="w-4 h-4 shrink-0" />}
+      {showIcon && <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />}
       <span>{message}</span>
     </div>
   )

@@ -32,12 +32,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${orbitron.variable} ${jetbrainsMono.variable} antialiased`}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-9999 focus:rounded-md focus:bg-surface-elevated focus:px-4 focus:py-2 focus:text-neural-primary-light focus:ring-2 focus:ring-neural-primary"
+        >
+          Skip to Main Content
+        </a>
         <QueryProvider>
           <SplashScreen />
           <Suspense fallback={<div className="h-16" />}>
             <Navbar />
           </Suspense>
-          <div className="pt-16">{children}</div>
+          <div id="main-content" tabIndex={-1} className="pt-16">
+            {children}
+          </div>
           <Toaster position="top-center" richColors />
         </QueryProvider>
       </body>

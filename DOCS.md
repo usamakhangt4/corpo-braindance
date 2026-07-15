@@ -135,6 +135,7 @@ corpo-braindance/
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
    ```
 
 4. **Set up Supabase database**
@@ -262,6 +263,7 @@ All schemas use `CREATE TABLE IF NOT EXISTS` and `CREATE OR REPLACE FUNCTION` fo
 | ------------------------------- | --------------------------- | -------- |
 | `NEXT_PUBLIC_SUPABASE_URL`      | Your Supabase project URL   | Yes      |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase anonymous key | Yes      |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Server-only username resolver credential; never expose to clients | Yes |
 
 ## 🔐 Authentication
 

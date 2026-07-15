@@ -33,9 +33,14 @@ export function LoadingSpinner({
   const sizeConfig = sizeClasses[size]
 
   return (
-    <div className={cn('flex flex-col items-center justify-center space-y-6', className)}>
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className={cn('flex flex-col items-center justify-center space-y-6', className)}
+    >
       {/* Loading Animation */}
-      <div className="flex space-x-2">
+      <div aria-hidden="true" className="flex space-x-2">
         <div
           className={cn(
             'bg-neural-primary-hover rounded-full animate-bounce',
@@ -67,6 +72,7 @@ export function LoadingSpinner({
           {message}
         </p>
       )}
+      {!message && <span className="sr-only">Loading…</span>}
     </div>
   )
 }

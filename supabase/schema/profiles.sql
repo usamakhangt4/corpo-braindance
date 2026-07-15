@@ -4,7 +4,7 @@
 -- Create the profiles table (extends auth.users)
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  username TEXT UNIQUE NOT NULL,
+  username TEXT UNIQUE NOT NULL CHECK (username ~ '^[a-zA-Z0-9_]{3,30}$'),
   
   -- Profile Information
   display_name TEXT,
@@ -54,22 +54,25 @@ CREATE POLICY "Users can update own profile"
   USING (auth.uid() = id)
   WITH CHECK (auth.uid() = id);
 
--- Function to automatically create profile on user signup
--- Note: This is mainly for OAuth users (Google, etc.) who don't provide username
--- For email/password signup, the Server Action creates the profile with the provided username
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
-  temp_username TEXT;
+  profile_username TEXT;
 BEGIN
-  -- Only create profile if it doesn't exist (Server Action might have already created it for email signup)
-  -- Generate a unique temporary username for OAuth users
-  temp_username := 'user_' || substr(NEW.id::text, 1, 8) || '_' || extract(epoch from now())::bigint;
+  profile_username := NEW.raw_user_meta_data->>'username';
+
+  IF profile_username IS NULL OR profile_username !~ '^[a-zA-Z0-9_]{3,30}$' THEN
+    profile_username := 'user_' || substr(NEW.id::text, 1, 8) || '_' || extract(epoch from now())::bigint;
+  END IF;
   
   INSERT INTO public.profiles (id, username, theme, language, timezone, notification_preferences, display_name, avatar_url)
   VALUES (
     NEW.id, 
-    temp_username,
+    profile_username,
     'dark',
     'en',
     'UTC',
@@ -80,7 +83,10 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM anon, authenticated;
 
 -- Trigger to create profile when user signs up
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
@@ -90,26 +96,41 @@ CREATE TRIGGER on_auth_user_created
 
 -- Function to check if username exists
 CREATE OR REPLACE FUNCTION public.username_exists(check_username TEXT)
-RETURNS BOOLEAN AS $$
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = ''
+AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM profiles WHERE username = check_username
+    SELECT 1 FROM public.profiles WHERE username = check_username
   );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.username_exists(TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.username_exists(TEXT) TO anon, authenticated;
 
 -- Function to get email by username (for username-based signin)
 CREATE OR REPLACE FUNCTION public.get_email_by_username(check_username TEXT)
-RETURNS TEXT AS $$
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 DECLARE
   user_email TEXT;
 BEGIN
   SELECT au.email INTO user_email
-  FROM profiles p
+  FROM public.profiles p
   JOIN auth.users au ON p.id = au.id
   WHERE p.username = check_username;
   
   RETURN user_email;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.get_email_by_username(TEXT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.get_email_by_username(TEXT) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.get_email_by_username(TEXT) TO service_role;
 

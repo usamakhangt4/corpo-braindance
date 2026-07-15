@@ -30,7 +30,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
   const queryClient = useQueryClient()
 
   // Zustand for UI state only
-  const { votingIds, addVotingId, removeVotingId, isVoting } = useVotingStore()
+  const { addVotingId, removeVotingId, isVoting } = useVotingStore()
 
   const handleVoteClick = async (id: number, action: VoteAction) => {
     if (!user) {
@@ -45,20 +45,6 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
 
     addVotingId(id)
 
-    // Determine vote type based on action and current vote state
-    const currentVote = currentEntry.user_vote
-    let voteType: 'upvote' | 'downvote'
-
-    if (action === 'promote') {
-      // If already upvoted, remove vote (unvote)
-      // Otherwise, upvote
-      voteType = currentVote === 'upvote' ? 'upvote' : 'upvote' // Will be handled by voteBuzzword logic
-    } else {
-      // If already downvoted, remove vote (unvote)
-      // Otherwise, downvote
-      voteType = currentVote === 'downvote' ? 'downvote' : 'downvote' // Will be handled by voteBuzzword logic
-    }
-
     try {
       await toast.promise(
         voteBuzzword.mutateAsync({
@@ -67,7 +53,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
           voteType: action === 'promote' ? 'upvote' : 'downvote',
         }),
         {
-          loading: action === 'promote' ? 'Promoting buzzword...' : 'Firing buzzword...',
+          loading: action === 'promote' ? 'Promoting buzzword…' : 'Firing buzzword…',
           success: action === 'promote' ? 'Vote recorded successfully!' : 'Vote recorded successfully!',
           error: (error) => {
             // If authentication error, show auth modal
@@ -115,7 +101,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
             entries.map((entry, index) => (
               <div
                 key={entry.id}
-                className="relative bg-surface-elevated border border-base rounded-2xl p-6 shadow-xl overflow-hidden transition-all hover:border-neural-primary/50 group"
+                className="relative bg-surface-elevated border border-base rounded-2xl p-6 shadow-xl overflow-hidden transition-[border-color] hover:border-neural-primary/50 group"
               >
                 {/* Background Gradient Blob */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"></div>
@@ -152,7 +138,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
 
                 {/* Phrase */}
                 <h2 className="text-2xl md:text-3xl font-serif font-medium text-primary leading-tight mb-3">
-                  "{entry.phrase}"
+                  “{entry.phrase}”
                 </h2>
 
                 {/* Meaning */}
@@ -179,7 +165,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
                   <div className="flex items-center gap-2">
                     <button
                       disabled
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-[color,background-color,opacity] disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                       aria-label="Reply"
                     >
                       <MessageSquare className="w-4 h-4" />
@@ -187,7 +173,7 @@ export function HallOfShameClient({ initialEntries }: HallOfShameClientProps) {
                     </button>
                     <button
                       disabled
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded text-muted hover:bg-surface-overlay transition-[color,background-color,opacity] disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                       aria-label="Share"
                     >
                       <Share2 className="w-4 h-4" />

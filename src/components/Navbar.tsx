@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { Home, Trophy, LogIn, UserPlus, LucideIcon, LogOut, User, Settings, Menu, X } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Home, Trophy, LogIn, LucideIcon, LogOut, User, Settings, Menu } from 'lucide-react'
 import { ROUTES } from '@/lib/constants/routes'
 import { useAuthStore } from '@/lib/stores/use-auth-store'
 import UserDropdown from './UserDropdown'
@@ -144,7 +144,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-surface-base/95 backdrop-blur-md border-b border-elevated/50 shadow-lg">
+      <nav aria-label="Primary navigation" className="fixed top-0 left-0 right-0 z-50 bg-surface-base/95 backdrop-blur-md border-b border-elevated/50 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo/Brand */}
@@ -161,7 +161,7 @@ export default function Navbar() {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200',
+                      'relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-[color,background-color,border-color,box-shadow] duration-200',
                       isActive
                         ? 'text-neural-primary-hover bg-neural-primary/10 border border-neural-primary/30 shadow-lg'
                         : 'text-secondary hover:text-neural-primary-hover hover:bg-surface-overlay/50 border border-transparent hover:border-neural-primary/20',
@@ -186,7 +186,7 @@ export default function Navbar() {
                 'bg-surface-elevated/95 backdrop-blur-md border-2',
                 'border-neural-primary/50 shadow-lg shadow-neural',
                 'flex items-center justify-center',
-                'transition-all duration-200',
+                'transition-[background-color,border-color,box-shadow,transform] duration-200',
                 'hover:bg-surface-overlay/95 hover:border-neural-primary-hover/70',
                 'hover:shadow-neural-accent hover:scale-105',
                 'active:scale-95',
@@ -196,6 +196,8 @@ export default function Navbar() {
                 menuOpen && 'border-neural-primary-hover shadow-xl shadow-neural-accent',
               )}
               aria-label="Toggle menu"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation-menu"
               type="button"
             >
               <div className="absolute inset-0 bg-neural-primary/10 rounded-lg blur-lg" />

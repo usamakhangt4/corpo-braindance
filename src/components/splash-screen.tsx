@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
-import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(false)
@@ -10,46 +9,43 @@ export default function SplashScreen() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
-    // Check if splash has been shown before
     const hasSeenSplash = localStorage.getItem('corpo-braindance-splash-shown')
 
-    if (hasSeenSplash === 'true') {
+    if (hasSeenSplash === 'true' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      localStorage.setItem('corpo-braindance-splash-shown', 'true')
       return
     }
 
-    // Show splash screen
-    setIsVisible(true)
-    localStorage.setItem('corpo-braindance-splash-shown', 'true')
+    let progressInterval: ReturnType<typeof setInterval> | undefined
+    let fadeTimer: ReturnType<typeof setTimeout> | undefined
+    let removeTimer: ReturnType<typeof setTimeout> | undefined
+    const showFrame = window.requestAnimationFrame(() => {
+      setIsVisible(true)
+      localStorage.setItem('corpo-braindance-splash-shown', 'true')
+      document.body.style.overflow = 'hidden'
 
-    // Prevent body scroll when splash is visible
-    document.body.style.overflow = 'hidden'
+      progressInterval = setInterval(() => {
+        setProgress((previous) => {
+          if (previous >= 100) {
+            if (progressInterval) clearInterval(progressInterval)
+            return 100
+          }
+          return previous + 2
+        })
+      }, 60)
 
-    // Animate progress bar
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(progressInterval)
-          return 100
-        }
-        return prev + 2
-      })
-    }, 60) // Update every 60ms to reach 100% in ~3 seconds
-
-    // Start fade out animation after 3 seconds
-    const fadeTimer = setTimeout(() => {
-      setIsAnimating(true)
-    }, 3000)
-
-    // Remove from DOM after fade animation completes
-    const removeTimer = setTimeout(() => {
-      setIsVisible(false)
-      document.body.style.overflow = ''
-    }, 3500) // 3s delay + 0.5s fade duration
+      fadeTimer = setTimeout(() => setIsAnimating(true), 3000)
+      removeTimer = setTimeout(() => {
+        setIsVisible(false)
+        document.body.style.overflow = ''
+      }, 3500)
+    })
 
     return () => {
-      clearInterval(progressInterval)
-      clearTimeout(fadeTimer)
-      clearTimeout(removeTimer)
+      window.cancelAnimationFrame(showFrame)
+      if (progressInterval) clearInterval(progressInterval)
+      if (fadeTimer) clearTimeout(fadeTimer)
+      if (removeTimer) clearTimeout(removeTimer)
       document.body.style.overflow = ''
     }
   }, [])
@@ -58,13 +54,16 @@ export default function SplashScreen() {
 
   return (
     <div
+      role="status"
+      aria-live="polite"
+      aria-label="Loading application"
       className={`
         fixed inset-0 z-9999 flex flex-col items-center justify-center bg-surface-base transition-opacity duration-500
         ${isAnimating ? 'opacity-0 pointer-events-none' : 'opacity-100'}
       `}
     >
       {/* Animated background grid */}
-      <div className="absolute inset-0 opacity-20">
+      <div aria-hidden="true" className="absolute inset-0 opacity-20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
       </div>
 
@@ -75,7 +74,7 @@ export default function SplashScreen() {
           <h1 className="glitch-text cursor-default text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-linear-to from-yellow-300 via-pink-500 to-cyan-400 mb-2 uppercase tracking-tighter">
             CORPO // BRAINDANCE
           </h1>
-          <p className="text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase">Loading...</p>
+          <p className="text-neural-primary-dark font-mono text-xs tracking-[0.5em] uppercase">Loading…</p>
         </div>
 
         {/* Loading dots */}
@@ -83,9 +82,16 @@ export default function SplashScreen() {
 
         {/* Progress bar */}
         <div className="w-full max-w-xs space-y-2">
-          <div className="h-1 bg-surface-overlay rounded-full overflow-hidden">
+          <div
+            role="progressbar"
+            aria-label="Application loading progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            className="h-1 bg-surface-overlay rounded-full overflow-hidden"
+          >
             <div
-              className="h-full bg-linear-to-r from-neural-primary-hover to-neural-secondary-light rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-linear-to-r from-neural-primary-hover to-neural-secondary-light rounded-full transition-[width] duration-300 ease-out"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -93,7 +99,7 @@ export default function SplashScreen() {
         </div>
 
         {/* Status text */}
-        <p className="text-muted text-lg text-center max-w-md">Please wait...</p>
+        <p className="text-muted text-lg text-center max-w-md">Please wait…</p>
       </div>
     </div>
   )
