@@ -2,15 +2,26 @@ import { describe, expect, it } from 'vitest'
 import { fileBuzzword, formatSavedBriefs, generateBuzzword } from '../src/lib/buzzwords/lab'
 
 describe('buzzword lab', () => {
-  it('generates a complete phrase locally from a selected role', () => {
+  it('generates a complete stack-aware phrase locally from a selected role', () => {
     const values = [0, 0, 0, 0, 0, 0]
     const result = generateBuzzword('ceo', () => values.shift() ?? 0)
 
     expect(result).toEqual({
-      phrase: 'Holistically Empower Mission-critical Synergies',
-      fullSentence: 'Our goal is to holistically empower the mission-critical synergies to drive long-term value.',
+      phrase: 'Holistically Architect Accessible Web Experiences',
+      fullSentence: 'Our goal is to holistically architect accessible web experiences to drive long-term value.',
       role: 'ceo',
+      field: 'frontend',
       score: 80,
+    })
+  })
+
+  it('uses a selected technology field while preserving the selected voice', () => {
+    const result = generateBuzzword('tech', () => 0, 'security')
+
+    expect(result).toMatchObject({
+      role: 'tech',
+      field: 'security',
+      phrase: 'Asynchronously Harden Zero-trust Security Controls',
     })
   })
 

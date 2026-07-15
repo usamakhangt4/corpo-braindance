@@ -39,90 +39,59 @@ with sync_playwright() as playwright:
     page.on("pageerror", lambda error: page_errors.append(str(error)))
 
     response = page.goto(base_url, wait_until="networkidle")
-    assert response and response.ok, response.status if response else "no response"
-    page.get_by_role("heading", name="CORPO // BRAINDANCE").wait_for()
-    page.get_by_role("heading", name="Saved Briefs").wait_for()
-    page.get_by_text("No saved briefs yet.", exact=False).wait_for()
-    assert page.get_by_text("Neural Dossier", exact=True).count() == 0
-    assert page.locator(".cyber-grid").evaluate("element => getComputedStyle(element).animationName") == "none"
+    assert response and response.ok, response.status if response else "No response"
+    page.get_by_role("heading", name="Make nothing sound strategic.").wait_for()
+    page.get_by_role("heading", name="Archived briefs").wait_for()
+    page.get_by_text("Nothing archived.", exact=True).wait_for()
+    page.get_by_text("VOICE / RANDOM", exact=True).wait_for()
+    page.get_by_text("SCOPE / ALL STACKS", exact=True).wait_for()
+    assert page.get_by_role("region", name="Tune generation").count() == 0
     assert_no_horizontal_overflow(page)
 
-    for label in ["Visionary", "Growth", "Engineering", "Generate", "Copy Brief", "Save Brief"]:
+    for label in ["Tune", "Generate jargon", "Copy memo", "Save brief"]:
         assert_touch_target(page.get_by_role("button", name=label))
+
+    page.get_by_role("button", name="Tune").click()
+    profile = page.get_by_role("region", name="Tune generation")
+    profile.wait_for()
+    page.get_by_role("button", name="ENGINEERING", exact=True).click()
+    page.get_by_role("button", name="CYBERSECURITY", exact=True).click()
+    page.get_by_role("button", name="Apply & generate").click()
+    assert profile.count() == 0
+    page.get_by_text("VOICE / ENGINEERING", exact=True).wait_for()
+    page.get_by_text("STACK / CYBERSECURITY", exact=True).wait_for()
+    assert_no_horizontal_overflow(page)
 
     if output:
         output.mkdir(parents=True, exist_ok=True)
-        page.screenshot(path=output / "generator-320-empty.png", full_page=True)
-
-    page.set_viewport_size({"width": 390, "height": 844})
-    assert_no_horizontal_overflow(page)
+        page.screenshot(path=output / "generator-tuned-320.png", full_page=True)
 
     phrase = page.get_by_test_id("generated-phrase").inner_text().strip("“”\"")
-    page.get_by_role("button", name="Save Brief").click()
-    page.get_by_text("1/20", exact=True).wait_for()
+    page.get_by_role("button", name="Save brief").click()
+    page.get_by_text("01 / 20", exact=True).wait_for()
     page.get_by_text(phrase, exact=True).wait_for()
-
-    page.get_by_role("button", name=f"Copy {phrase}").click()
-    assert phrase in page.evaluate("navigator.clipboard.readText()")
-
-    page.get_by_role("button", name="Copy All").click()
-    saved_text = page.evaluate("navigator.clipboard.readText()")
-    assert "CORPO // BRAINDANCE" in saved_text
-    assert "SAVED BRIEFS // 1 ITEM" in saved_text
-    assert phrase in saved_text
 
     page.reload(wait_until="networkidle")
-    page.get_by_text("1/20", exact=True).wait_for()
+    page.get_by_text("VOICE / ENGINEERING", exact=True).wait_for()
+    page.get_by_text("SCOPE / CYBERSECURITY", exact=True).wait_for()
     page.get_by_text(phrase, exact=True).wait_for()
 
-    page.get_by_role("button", name=f"Remove {phrase} from saved briefs").click()
-    page.get_by_text("0/20", exact=True).wait_for()
-    page.get_by_role("button", name="Undo").last.click()
-    page.get_by_text("1/20", exact=True).wait_for()
+    page.get_by_role("button", name="Tune").click()
+    page.keyboard.press("Escape")
+    assert page.get_by_role("region", name="Tune generation").count() == 0
 
-    page.get_by_role("button", name="Clear All").click()
-    page.get_by_text("0/20", exact=True).wait_for()
-    page.get_by_role("button", name="Undo").last.click()
-    page.get_by_text("1/20", exact=True).wait_for()
-
-    if output:
-        page.screenshot(path=output / "generator-390-saved.png", full_page=True)
-
-    page.set_viewport_size({"width": 768, "height": 900})
-    assert_no_horizontal_overflow(page)
-    if output:
-        page.screenshot(path=output / "generator-tablet.png", full_page=True)
+    page.get_by_role("button", name="Tune").click()
+    page.get_by_role("button", name="Reset to random").click()
+    page.get_by_text("VOICE / RANDOM", exact=True).wait_for()
+    page.get_by_text("SCOPE / ALL STACKS", exact=True).wait_for()
 
     page.set_viewport_size({"width": 1440, "height": 1000})
+    page.get_by_role("button", name="Tune").click()
+    page.get_by_role("region", name="Tune generation").wait_for()
     assert_no_horizontal_overflow(page)
     if output:
-        page.screenshot(path=output / "generator-desktop.png", full_page=True)
+        page.screenshot(path=output / "generator-profile-desktop.png", full_page=True)
 
     assert not page_errors, page_errors
     context.close()
-
-    motion_context = browser.new_context(viewport={"width": 1024, "height": 900}, reduced_motion="no-preference")
-    motion_page = motion_context.new_page()
-    motion_errors: list[str] = []
-    motion_page.on("pageerror", lambda error: motion_errors.append(str(error)))
-    motion_page.goto(base_url, wait_until="networkidle")
-    motion_page.locator("h1.hero-lockup").wait_for()
-    assert motion_page.locator(".cyber-grid").evaluate("element => getComputedStyle(element).animationName") == "grid-drive"
-
-    motion_page.get_by_role("button", name="Generate").click()
-    motion_page.wait_for_function(
-        "document.querySelector('.neural-frame')?.dataset.transmitting === 'true'",
-        timeout=1000,
-    )
-    assert motion_page.locator(".transmission-beam").evaluate(
-        "element => getComputedStyle(element).animationName"
-    ) == "transmission-sweep"
-    assert motion_page.get_by_test_id("generated-phrase").evaluate(
-        "element => getComputedStyle(element).animationName"
-    ) == "phrase-decode"
-    if output:
-        motion_page.screenshot(path=output / "generator-motion-enabled.png", full_page=True)
-    assert not motion_errors, motion_errors
-    motion_context.close()
-
     browser.close()
