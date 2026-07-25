@@ -238,7 +238,9 @@
 
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(18rem, 0.72fr) minmax(38rem, 1.28fr);
+    /* 20rem is the narrowest the copy column can be before the fact row wraps
+       and its top/bottom rules double up. */
+    grid-template-columns: minmax(20rem, 0.72fr) minmax(38rem, 1.28fr);
     gap: clamp(3rem, 7vw, 8rem);
     align-items: start;
     padding-block: clamp(2.5rem, 3.2vw, 4rem);
@@ -611,7 +613,8 @@
 
   .brief-panel-shell {
     display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr);
+    /* The rail sizes to its rotated label; a fixed width clips the glyphs. */
+    grid-template-columns: auto minmax(0, 1fr);
     margin-top: 1rem;
   }
 
@@ -673,9 +676,10 @@
   .output-meta {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 1rem;
+    /* Even column spacing keeps the row readable when it wraps; space-between
+       stranded the last item with arbitrary gaps. */
+    gap: 0.55rem 1.75rem;
     border-bottom: 1px solid #55555a;
     padding-bottom: 0.85rem;
     color: #a8a89f;
@@ -692,7 +696,9 @@
   }
 
   .generated-phrase {
-    max-width: 11ch;
+    /* Generous cap only to keep the measure readable on ultra-wide screens;
+       below that the panel width governs. */
+    max-width: 32ch;
     margin: clamp(1.8rem, 3.2vw, 2.6rem) 0;
     color: var(--cyber-white);
     font-family: var(--font-barlow-condensed), sans-serif;
@@ -702,8 +708,10 @@
     letter-spacing: -0.035em;
     text-transform: uppercase;
     text-wrap: balance;
-    overflow-wrap: normal;
-    word-break: normal;
+    /* Generated tokens reach 25 characters ("cryptographically-agilize"), which
+       the panel's hidden overflow would otherwise slice off. */
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   .generated-brief {
@@ -836,7 +844,8 @@
     display: flex;
     flex: none;
     align-items: center;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
   }
 
   .archive-count {
@@ -845,10 +854,12 @@
     font-size: 2.4rem;
     font-weight: 800;
     line-height: 1;
+    white-space: nowrap;
   }
 
   .archive-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
   }
 
@@ -951,7 +962,8 @@
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    overflow-wrap: anywhere;
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   .archive-card-body > p:last-child {
@@ -959,7 +971,8 @@
     color: #a7a79e;
     font-size: 0.82rem;
     line-height: 1.45;
-    overflow-wrap: anywhere;
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   .archive-card-actions {
@@ -969,8 +982,10 @@
   }
 
   .archive-icon-action {
-    width: 2.75rem;
-    height: 2.75rem;
+    /* The size-8 utility from Button outranks this layer, so hold the 44px
+       touch target with min-* rather than width/height. */
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     color: #a7a79e !important;
   }
 
@@ -1303,10 +1318,6 @@
     flex: 1 1 100%;
   }
 
-  .brief-panel-shell {
-    grid-template-columns: 1.35rem minmax(0, 1fr);
-  }
-
   .brief-panel-rail {
     font-size: 0.45rem;
   }
@@ -1321,13 +1332,11 @@
     font-size: 0.5rem;
   }
 
-  .output-meta span:last-child {
-    text-align: right;
-  }
-
   .generated-phrase {
     margin-block: 2rem;
-    font-size: clamp(2rem, 9.8vw, 3.4rem);
+    /* 8.8vw is the largest step at which 16-character tokens such as
+       "PROGRAMMATICALLY" still fit the column on a 360px phone. */
+    font-size: clamp(1.75rem, 8.8vw, 3.4rem);
   }
 
   .generated-brief {
