@@ -238,7 +238,9 @@
 
   .hero-grid {
     display: grid;
-    grid-template-columns: minmax(18rem, 0.72fr) minmax(38rem, 1.28fr);
+    /* 20rem is the narrowest the copy column can be before the fact row wraps
+       and its top/bottom rules double up. */
+    grid-template-columns: minmax(20rem, 0.72fr) minmax(38rem, 1.28fr);
     gap: clamp(3rem, 7vw, 8rem);
     align-items: start;
     padding-block: clamp(2.5rem, 3.2vw, 4rem);
