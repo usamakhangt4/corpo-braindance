@@ -957,7 +957,8 @@
     font-weight: 700;
     line-height: 1;
     text-transform: uppercase;
-    overflow-wrap: anywhere;
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   .archive-card-body > p:last-child {
@@ -965,7 +966,8 @@
     color: #a7a79e;
     font-size: 0.82rem;
     line-height: 1.45;
-    overflow-wrap: anywhere;
+    hyphens: auto;
+    overflow-wrap: break-word;
   }
 
   .archive-card-actions {
